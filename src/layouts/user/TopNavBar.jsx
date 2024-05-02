@@ -16,7 +16,13 @@ const TopNavbar = ({ routes }) => {
   };
 
   return (
-    <Navbar fixed="top" collapseOnSelect expand="lg">
+    <Navbar
+      bg="primary"
+      data-bs-theme="dark"
+      fixed="top"
+      collapseOnSelect
+      expand="lg"
+    >
       <Container>
         <Navbar.Brand
           style={{ cursor: "pointer" }}
