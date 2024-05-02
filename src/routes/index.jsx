@@ -6,10 +6,11 @@ import AdminLayout from "../layouts/admin/AdminLayout";
 import Dashboard from "../layouts/admin/pages/Dashboard";
 import Penitip from "../layouts/admin/pages/Penitip";
 import KaryawanProtectedRoutes from "./KaryawanProtectedRoutes";
-import { AdminLoginPage } from "../layouts/admin/pages/Login";
+import { LoginPage } from "../layouts/Login";
 import Customer from "../layouts/admin/pages/Pengguna";
 import BahanBaku from "../layouts/admin/pages/BahanBaku";
 import PengeluaranLain from "../layouts/admin/pages/Pengeluaran";
+import { ResetPasswordPage } from "../layouts/ResetPassword";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -26,7 +27,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "/login",
-            element: <AdminLoginPage />,
+            element: <LoginPage />,
+          },
+          {
+            path: "/password/reset",
+            element: <ResetPasswordPage />,
           },
         ],
       },
