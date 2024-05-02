@@ -16,7 +16,7 @@ import { GetAllCustomer } from "../../../api/apiCustomer";
 import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
-
+import dayjs from "dayjs";
 export const tableHeader = [
   { id: "nama", label: "Nama", minWidth: 100 },
   { id: "email", label: "Email", minWidth: 100 },
@@ -36,7 +36,11 @@ const Customer = () => {
     setIsLoading(true);
     GetAllCustomer()
       .then((response) => {
-        setCustomer(response);
+        const formattedResponse = response.map((item) => ({
+          ...item,
+          tanggal_lahir: dayjs(item.tanggal_lahir).format("DD MMM YYYY"),
+        }));
+        setCustomer(formattedResponse);
       })
       .catch((err) => {
         console.log(err);

@@ -79,8 +79,8 @@ const FormLogin = () => {
       className="p-4"
       onSubmit={Login}
     >
-      <Stack direction="vertical" gap={3} className="mb-3">
-        <Alert variant="primary" className="mb-5 alertColor">
+      <Stack direction="vertical" gap={3}>
+        <Alert variant="primary" className="mb-3 alertColor">
           <p className="mb-0 lead">
             <strong>Atma Kitchen</strong> mantaaapss
           </p>

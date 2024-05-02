@@ -182,7 +182,7 @@ const Penitip = () => {
                     fullWidth
                     label="Nama"
                     name="nama"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.nama}
                     disabled={!isFilling}
@@ -194,7 +194,7 @@ const Penitip = () => {
                     fullWidth
                     label="Nomor Telepon"
                     name="no_telp"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.no_telp}
                     disabled={!isFilling}
