@@ -19,7 +19,7 @@ const LogoutConfirmation = () => {
     sessionStorage.removeItem("role");
     toast.success("Logged out");
     handleClose();
-    navigate("/admin/login");
+    navigate("/login");
   };
   return (
     <>

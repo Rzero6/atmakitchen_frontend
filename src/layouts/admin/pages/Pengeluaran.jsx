@@ -21,10 +21,21 @@ import {
 import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { MoneyFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 100 },
-  { id: "no_telp", label: "Nomor Telepon", minWidth: 100 },
+  { id: "rincian", label: "Rincian", minWidth: 300 },
+  {
+    id: "nominal",
+    label: "Nominal",
+    minWidth: 100,
+    format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
+  },
+  { id: "tanggal_pengeluaran", label: "Tanggal Pengeluaran", minWidth: 100 },
 ];
 
 const PengeluaranLain = () => {
@@ -39,11 +50,12 @@ const PengeluaranLain = () => {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [data, setData] = useState({
-    nama: "",
-    no_telp: "",
+    rincian: "",
+    nominal: "",
+    tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
   });
   const handleChange = (event) => {
-    if (event.target.name === "no_telp" && isNaN(event.target.value)) return;
+    if (event.target.name === "nominal" && isNaN(event.target.value)) return;
     setData({ ...data, [event.target.name]: event.target.value });
   };
 
@@ -57,7 +69,13 @@ const PengeluaranLain = () => {
     setIsLoading(true);
     GetAllPengeluaranLain()
       .then((response) => {
-        setPengeluaranLain(response);
+        const formattedResponse = response.map((item) => ({
+          ...item,
+          tanggal_pengeluaran: dayjs(item.tanggal_pengeluaran).format(
+            "DD MMM YYYY"
+          ),
+        }));
+        setPengeluaranLain(formattedResponse);
       })
       .catch((err) => {
         console.log(err);
@@ -70,7 +88,11 @@ const PengeluaranLain = () => {
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", no_telp: "" });
+    setData({
+      rincian: "",
+      nominal: "",
+      tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
+    });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -140,8 +162,9 @@ const PengeluaranLain = () => {
         });
     } else {
       const formData = new FormData();
-      formData.append("nama", data.nama);
-      formData.append("no_telp", data.no_telp);
+      formData.append("rincian", data.rincian);
+      formData.append("nominal", data.nominal);
+      formData.append("tanggal_pengeluaran", data.tanggal_pengeluaran);
       CreatePengeluaranLain(formData)
         .then((response) => {
           toast.success(response.message);
@@ -180,25 +203,46 @@ const PengeluaranLain = () => {
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nama"
-                    name="nama"
-                    variant="filled"
+                    label="Rincian"
+                    name="rincian"
+                    variant="outlined"
                     color="primary"
-                    value={data.nama}
+                    value={data.rincian}
                     disabled={!isFilling}
                     onChange={handleChange}
                   />
                 </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Tanggal Pengeluaran"
+                      name="tanggal_pengeluaran"
+                      disabled={!isFilling}
+                      onChange={(newValue) => {
+                        const formattedDate = newValue.format("YYYY-MM-DD");
+                        setData({
+                          ...data,
+                          tanggal_pengeluaran: formattedDate,
+                        });
+                      }}
+                      value={dayjs(data.tanggal_pengeluaran)}
+                      className="w-100"
+                    />
+                  </LocalizationProvider>
+                </Col>
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nomor Telepon"
-                    name="no_telp"
-                    variant="filled"
+                    label="Nominal"
+                    name="nominal"
+                    variant="outlined"
                     color="primary"
-                    value={data.no_telp}
+                    value={data.nominal}
                     disabled={!isFilling}
                     onChange={handleChange}
+                    InputProps={{ inputComponent: MoneyFormat }}
                   />
                 </Col>
               </Row>
@@ -211,7 +255,11 @@ const PengeluaranLain = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" || data.no_telp.trim() === ""
+                      data.rincian.trim() === "" ||
+                      (typeof data.nominal === "string"
+                        ? data.nominal.trim() === ""
+                        : data.nominal === "") ||
+                      data.tanggal_pengeluaran.trim() === ""
                     }
                   >
                     {isPending ? (
@@ -288,7 +336,7 @@ const PengeluaranLain = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada PengeluaranLain....
+              Belum ada Pengeluaran Lain....
             </Alert>
           </div>
         )}

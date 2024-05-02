@@ -21,6 +21,7 @@ import {
 import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
+import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
   { id: "nama", label: "Nama", minWidth: 250 },
@@ -203,7 +204,7 @@ const BahanBaku = () => {
                     fullWidth
                     label="Nama"
                     name="nama"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.nama}
                     disabled={!isFilling}
@@ -217,11 +218,12 @@ const BahanBaku = () => {
                     fullWidth
                     label="Stok"
                     name="stok"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.stok}
                     disabled={!isFilling}
                     onChange={handleChange}
+                    InputProps={{ inputComponent: NumberFormat }}
                   />
                 </Col>
                 <Col>
@@ -229,7 +231,7 @@ const BahanBaku = () => {
                     fullWidth
                     label="Satuan"
                     name="satuan"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.satuan}
                     disabled={!isFilling}
@@ -241,11 +243,12 @@ const BahanBaku = () => {
                     fullWidth
                     label="Harga"
                     name="harga"
-                    variant="filled"
+                    variant="outlined"
                     color="primary"
                     value={data.harga}
                     disabled={!isFilling}
                     onChange={handleChange}
+                    InputProps={{ inputComponent: MoneyFormat }}
                   />
                 </Col>
               </Row>
