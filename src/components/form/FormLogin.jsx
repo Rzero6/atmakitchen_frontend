@@ -125,16 +125,21 @@ const FormLogin = () => {
             onChange={handleChange}
           />
         </FormControl>
-        {failedAttempt && (
+        {failedAttempt ? (
           <Alert variant="danger" className="alertColor">
             <p className="mb-0 lead">
-              <strong>Password atau Email Salah</strong> Jika anda lupa password
-              silahkan klik{" "}
-              <a href="" style={{ color: "black" }}>
-                <strong>forgot password</strong>
-              </a>
+              <strong>Password atau Email Salah</strong>
+            </p>
+            <p className="m-0">
+              <Link to="/password/reset" style={{ color: "black" }}>
+                aduh lupa password
+              </Link>
             </p>
           </Alert>
+        ) : (
+          <div className="text-end">
+            <Link to="/password/reset">lupa password ?</Link>
+          </div>
         )}
 
         <Button
@@ -148,6 +153,7 @@ const FormLogin = () => {
             <span>Login</span>
           )}
         </Button>
+        <Button className="btn-lg">Register</Button>
       </Stack>
     </Form>
   );
