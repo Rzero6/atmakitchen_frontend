@@ -25,6 +25,18 @@ export const tableHeader = [
     label: "Tanggal Lahir",
     minWidth: 100,
   },
+  {
+    id: "no_telepon",
+    label: "Nomor Telepon",
+    minWidth: 100,
+    format: (value) => {
+      let formattedValue = value.replace(/(.{4})/g, "$1-");
+      if (formattedValue.endsWith("-")) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
+      return formattedValue;
+    },
+  },
 ];
 
 const Customer = () => {
@@ -43,6 +55,7 @@ const Customer = () => {
         setCustomer(formattedResponse);
       })
       .catch((err) => {
+        toast.error(JSON.stringify(err.message));
         console.log(err);
       })
       .finally(() => setIsLoading(false));
@@ -59,7 +72,7 @@ const Customer = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">Customer</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Pelanggan</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
       {isLoading ? (

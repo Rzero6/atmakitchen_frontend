@@ -4,13 +4,18 @@ import Home from "../layouts/user/pages/Home";
 import UserLayout from "../layouts/user/UserLayout";
 import AdminLayout from "../layouts/admin/AdminLayout";
 import Dashboard from "../layouts/admin/pages/Dashboard";
-import Penitip from "../layouts/admin/pages/Penitip";
-import KaryawanProtectedRoutes from "./KaryawanProtectedRoutes";
+import Penitip from "../layouts/mo/pages/Penitip";
+import AdminProtectedRoutes from "./AdminProtectedRoutes";
+import MOProtectedRoutes from "./MOProtectedRoutes";
+import OwnerProtectedRoutes from "./OwnerProctectedRoutes";
 import { LoginPage } from "../layouts/Login";
-import Customer from "../layouts/admin/pages/Pengguna";
+import Customer from "../layouts/admin/pages/Customer";
 import BahanBaku from "../layouts/admin/pages/BahanBaku";
-import PengeluaranLain from "../layouts/admin/pages/Pengeluaran";
+import PengeluaranLain from "../layouts/mo/pages/Pengeluaran";
 import { ResetPasswordPage } from "../layouts/ResetPassword";
+import OwnerLayout from "../layouts/owner/OwnerLayout";
+import MOLayout from "../layouts/mo/MOLayout";
+import Karyawan from "../layouts/mo/pages/Karyawan";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -38,16 +43,45 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <KaryawanProtectedRoutes>
+          <AdminProtectedRoutes>
             <AdminLayout />
-          </KaryawanProtectedRoutes>
+          </AdminProtectedRoutes>
         ),
         children: [
           { path: "/admin", element: <Dashboard /> },
-          { path: "/admin/penitip", element: <Penitip /> },
+          { path: "/admin/pelanggan", element: <Customer /> },
           { path: "/admin/bahanbaku", element: <BahanBaku /> },
-          { path: "/admin/pengeluaran", element: <PengeluaranLain /> },
-          { path: "/admin/pengguna", element: <Customer /> },
+          // { path: "/admin/produk", element: <Produk /> },
+          // { path: "/admin/resep", element: <Resep /> },
+          // { path: "/admin/hampers", element: <Hampers /> },
+        ],
+      },
+      {
+        path: "/mo",
+        element: (
+          <MOProtectedRoutes>
+            <MOLayout />
+          </MOProtectedRoutes>
+        ),
+        children: [
+          { path: "/mo", element: <Dashboard /> },
+          // { path: "/mo/jabatan", element: <Customer /> },
+          { path: "/mo/karyawan", element: <Karyawan /> },
+          { path: "/mo/penitip", element: <Penitip /> },
+          // { path: "/mo/pembelian-bahanbaku", element: <PengeluaranLain /> },
+          { path: "/mo/pengeluaran-lain", element: <PengeluaranLain /> },
+        ],
+      },
+      {
+        path: "/owner",
+        element: (
+          <OwnerProtectedRoutes>
+            <OwnerLayout />
+          </OwnerProtectedRoutes>
+        ),
+        children: [
+          { path: "/owner", element: <Dashboard /> },
+          // { path: "/owner/gaji-bonus", element: <Penitip /> },
         ],
       },
     ],
