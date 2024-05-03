@@ -13,36 +13,37 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
-  CreatePengeluaranLain,
-  DeletePengeluaranLain,
-  GetAllPengeluaranLain,
-  UpdatePengeluaranLain,
-} from "../../../api/apiPengeluaranLain";
+  CreatePenitip,
+  DeletePenitip,
+  GetAllPenitip,
+  UpdatePenitip,
+} from "../../../api/apiPenitip";
 import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import { MoneyFormat } from "../../../components/NumericFormat";
+import { PhoneNumberFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
-  { id: "rincian", label: "Rincian", minWidth: 300 },
+  { id: "nama", label: "Nama", minWidth: 100 },
   {
-    id: "nominal",
-    label: "Nominal",
+    id: "no_telp",
+    label: "Nomor Telepon",
     minWidth: 100,
-    format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
+    format: (value) => {
+      let formattedValue = value.replace(/(.{4})/g, "$1-");
+      if (formattedValue.endsWith("-")) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
+      return formattedValue;
+    },
   },
-  { id: "tanggal_pengeluaran", label: "Tanggal Pengeluaran", minWidth: 100 },
 ];
 
-const PengeluaranLain = () => {
+const Penitip = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [pengeluaranLain, setPengeluaranLain] = useState([]);
+  const [penitip, setPenitip] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -50,49 +51,39 @@ const PengeluaranLain = () => {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [data, setData] = useState({
-    rincian: "",
-    nominal: "",
-    tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
+    nama: "",
+    no_telp: "",
   });
   const handleChange = (event) => {
-    if (event.target.name === "nominal" && isNaN(event.target.value)) return;
     setData({ ...data, [event.target.name]: event.target.value });
   };
 
   const handleRowClick = (row) => {
+    clearAll();
     setSelectedRow(row);
     setIsEditDisabled(false);
     setIsDelDisabled(false);
     setData(row);
   };
-  const fetchPengeluaranLain = () => {
+  const fetchPenitip = () => {
     setIsLoading(true);
-    GetAllPengeluaranLain()
+    GetAllPenitip()
       .then((response) => {
-        const formattedResponse = response.map((item) => ({
-          ...item,
-          tanggal_pengeluaran: dayjs(item.tanggal_pengeluaran).format(
-            "DD MMM YYYY"
-          ),
-        }));
-        setPengeluaranLain(formattedResponse);
+        setPenitip(response);
       })
       .catch((err) => {
+        toast.error(JSON.stringify(err.message));
         console.log(err);
       })
       .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
-    fetchPengeluaranLain();
+    fetchPenitip();
   }, []);
 
   const clearAll = () => {
-    setData({
-      rincian: "",
-      nominal: "",
-      tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
-    });
+    setData({ nama: "", no_telp: "" });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -116,14 +107,14 @@ const PengeluaranLain = () => {
 
   const delData = (id) => {
     setIsPending(true);
-    DeletePengeluaranLain(id)
+    DeletePenitip(id)
       .then((response) => {
         setIsPending(false);
         toast.success(response.message);
       })
       .catch((err) => {
         console.log(err);
-        toast.dark(err.message);
+        toast.error(err.message);
       })
       .finally(() => {
         setIsPending(false);
@@ -139,7 +130,7 @@ const PengeluaranLain = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
-    fetchPengeluaranLain();
+    fetchPenitip();
   };
 
   const submitData = (event) => {
@@ -147,36 +138,35 @@ const PengeluaranLain = () => {
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdatePengeluaranLain(data)
+      UpdatePenitip(data)
         .then((response) => {
           toast.success(response.message);
         })
         .catch((err) => {
           console.log(err);
-          toast(err.message);
+          toast.error(JSON.stringify(err.message));
         })
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPengeluaranLain();
+          fetchPenitip();
         });
     } else {
       const formData = new FormData();
-      formData.append("rincian", data.rincian);
-      formData.append("nominal", data.nominal);
-      formData.append("tanggal_pengeluaran", data.tanggal_pengeluaran);
-      CreatePengeluaranLain(formData)
+      formData.append("nama", data.nama);
+      formData.append("no_telp", data.no_telp);
+      CreatePenitip(formData)
         .then((response) => {
           toast.success(response.message);
         })
         .catch((err) => {
           console.log(err);
-          toast.dark(JSON.stringify(err.message));
+          toast.error(JSON.stringify(err.message));
         })
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPengeluaranLain();
+          fetchPenitip();
         });
     }
   };
@@ -188,7 +178,7 @@ const PengeluaranLain = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">PengeluaranLain</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Penitip</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
 
@@ -203,46 +193,26 @@ const PengeluaranLain = () => {
                 <Col>
                   <TextField
                     fullWidth
-                    label="Rincian"
-                    name="rincian"
+                    label="Nama"
+                    name="nama"
                     variant="outlined"
                     color="primary"
-                    value={data.rincian}
+                    value={data.nama}
                     disabled={!isFilling}
                     onChange={handleChange}
                   />
                 </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Tanggal Pengeluaran"
-                      name="tanggal_pengeluaran"
-                      disabled={!isFilling}
-                      onChange={(newValue) => {
-                        const formattedDate = newValue.format("YYYY-MM-DD");
-                        setData({
-                          ...data,
-                          tanggal_pengeluaran: formattedDate,
-                        });
-                      }}
-                      value={dayjs(data.tanggal_pengeluaran)}
-                      className="w-100"
-                    />
-                  </LocalizationProvider>
-                </Col>
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nominal"
-                    name="nominal"
+                    label="Nomor Telepon"
+                    name="no_telp"
                     variant="outlined"
                     color="primary"
-                    value={data.nominal}
+                    value={data.no_telp}
                     disabled={!isFilling}
                     onChange={handleChange}
-                    InputProps={{ inputComponent: MoneyFormat }}
+                    InputProps={{ inputComponent: PhoneNumberFormat }}
                   />
                 </Col>
               </Row>
@@ -255,11 +225,7 @@ const PengeluaranLain = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.rincian.trim() === "" ||
-                      (typeof data.nominal === "string"
-                        ? data.nominal.trim() === ""
-                        : data.nominal === "") ||
-                      data.tanggal_pengeluaran.trim() === ""
+                      data.nama.trim() === "" || data.no_telp.trim() === ""
                     }
                   >
                     {isPending ? (
@@ -324,10 +290,10 @@ const PengeluaranLain = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : pengeluaranLain?.length > 0 ? (
+        ) : penitip?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={pengeluaranLain}
+            data={penitip}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -336,7 +302,7 @@ const PengeluaranLain = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada Pengeluaran Lain....
+              Belum ada Penitip....
             </Alert>
           </div>
         )}
@@ -387,4 +353,4 @@ const PengeluaranLain = () => {
   );
 };
 
-export default PengeluaranLain;
+export default Penitip;

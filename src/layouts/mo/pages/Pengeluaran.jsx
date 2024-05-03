@@ -13,32 +13,36 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
-  CreateBahanBaku,
-  DeleteBahanBaku,
-  GetAllBahanBaku,
-  UpdateBahanBaku,
-} from "../../../api/apiBahanBaku";
+  CreatePengeluaranLain,
+  DeletePengeluaranLain,
+  GetAllPengeluaranLain,
+  UpdatePengeluaranLain,
+} from "../../../api/apiPengeluaranLain";
 import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
-import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { MoneyFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 250 },
+  { id: "rincian", label: "Rincian", minWidth: 300 },
   {
-    id: "stok",
-    label: "Stok",
-    minWidth: 50,
-    format: (value) => value.toLocaleString("id-ID"),
+    id: "nominal",
+    label: "Nominal",
+    minWidth: 100,
+    format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
   },
-  { id: "satuan", label: "Satuan", minWidth: 50 },
+  { id: "tanggal_pengeluaran", label: "Tanggal Pengeluaran", minWidth: 100 },
 ];
 
-const BahanBaku = () => {
+const PengeluaranLain = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [bahanBaku, setBahanBaku] = useState([]);
+  const [pengeluaranLain, setPengeluaranLain] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -46,11 +50,12 @@ const BahanBaku = () => {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [data, setData] = useState({
-    nama: "",
-    stok: "",
-    satuan: "",
+    rincian: "",
+    nominal: "",
+    tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
   });
   const handleChange = (event) => {
+    if (event.target.name === "nominal" && isNaN(event.target.value)) return;
     setData({ ...data, [event.target.name]: event.target.value });
   };
 
@@ -61,11 +66,17 @@ const BahanBaku = () => {
     setIsDelDisabled(false);
     setData(row);
   };
-  const fetchBahanBaku = () => {
+  const fetchPengeluaranLain = () => {
     setIsLoading(true);
-    GetAllBahanBaku()
+    GetAllPengeluaranLain()
       .then((response) => {
-        setBahanBaku(response);
+        const formattedResponse = response.map((item) => ({
+          ...item,
+          tanggal_pengeluaran: dayjs(item.tanggal_pengeluaran).format(
+            "DD MMM YYYY"
+          ),
+        }));
+        setPengeluaranLain(formattedResponse);
       })
       .catch((err) => {
         console.log(err);
@@ -74,11 +85,15 @@ const BahanBaku = () => {
   };
 
   useEffect(() => {
-    fetchBahanBaku();
+    fetchPengeluaranLain();
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", stok: "", satuan: "" });
+    setData({
+      rincian: "",
+      nominal: "",
+      tanggal_pengeluaran: dayjs().format("YYYY-MM-DD"),
+    });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -102,14 +117,14 @@ const BahanBaku = () => {
 
   const delData = (id) => {
     setIsPending(true);
-    DeleteBahanBaku(id)
+    DeletePengeluaranLain(id)
       .then((response) => {
         setIsPending(false);
         toast.success(response.message);
       })
       .catch((err) => {
         console.log(err);
-        toast.dark(err.message);
+        toast.error(err.message);
       })
       .finally(() => {
         setIsPending(false);
@@ -125,7 +140,7 @@ const BahanBaku = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
-    fetchBahanBaku();
+    fetchPengeluaranLain();
   };
 
   const submitData = (event) => {
@@ -133,7 +148,7 @@ const BahanBaku = () => {
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdateBahanBaku(data)
+      UpdatePengeluaranLain(data)
         .then((response) => {
           toast.success(response.message);
         })
@@ -144,15 +159,14 @@ const BahanBaku = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchBahanBaku();
+          fetchPengeluaranLain();
         });
     } else {
       const formData = new FormData();
-      formData.append("nama", data.nama);
-      formData.append("stok", data.stok);
-      formData.append("satuan", data.satuan);
-
-      CreateBahanBaku(formData)
+      formData.append("rincian", data.rincian);
+      formData.append("nominal", data.nominal);
+      formData.append("tanggal_pengeluaran", data.tanggal_pengeluaran);
+      CreatePengeluaranLain(formData)
         .then((response) => {
           toast.success(response.message);
         })
@@ -163,7 +177,7 @@ const BahanBaku = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchBahanBaku();
+          fetchPengeluaranLain();
         });
     }
   };
@@ -175,7 +189,7 @@ const BahanBaku = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">BahanBaku</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">PengeluaranLain</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
 
@@ -190,11 +204,11 @@ const BahanBaku = () => {
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nama"
-                    name="nama"
+                    label="Rincian"
+                    name="rincian"
                     variant="outlined"
                     color="primary"
-                    value={data.nama}
+                    value={data.rincian}
                     disabled={!isFilling}
                     onChange={handleChange}
                   />
@@ -202,28 +216,34 @@ const BahanBaku = () => {
               </Row>
               <Row>
                 <Col>
-                  <TextField
-                    fullWidth
-                    label="Stok"
-                    name="stok"
-                    variant="outlined"
-                    color="primary"
-                    value={data.stok}
-                    disabled={!isFilling}
-                    onChange={handleChange}
-                    InputProps={{ inputComponent: NumberFormat }}
-                  />
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Tanggal Pengeluaran"
+                      name="tanggal_pengeluaran"
+                      disabled={!isFilling}
+                      onChange={(newValue) => {
+                        const formattedDate = newValue.format("YYYY-MM-DD");
+                        setData({
+                          ...data,
+                          tanggal_pengeluaran: formattedDate,
+                        });
+                      }}
+                      value={dayjs(data.tanggal_pengeluaran)}
+                      className="w-100"
+                    />
+                  </LocalizationProvider>
                 </Col>
                 <Col>
                   <TextField
                     fullWidth
-                    label="Satuan"
-                    name="satuan"
+                    label="Nominal"
+                    name="nominal"
                     variant="outlined"
                     color="primary"
-                    value={data.satuan}
+                    value={data.nominal}
                     disabled={!isFilling}
                     onChange={handleChange}
+                    InputProps={{ inputComponent: MoneyFormat }}
                   />
                 </Col>
               </Row>
@@ -236,11 +256,11 @@ const BahanBaku = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" ||
-                      (typeof data.stok === "string"
-                        ? data.stok.trim() === ""
-                        : data.stok === "") ||
-                      data.satuan.trim() === ""
+                      data.rincian.trim() === "" ||
+                      (typeof data.nominal === "string"
+                        ? data.nominal.trim() === ""
+                        : data.nominal === "") ||
+                      data.tanggal_pengeluaran.trim() === ""
                     }
                   >
                     {isPending ? (
@@ -305,10 +325,10 @@ const BahanBaku = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : bahanBaku?.length > 0 ? (
+        ) : pengeluaranLain?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={bahanBaku}
+            data={pengeluaranLain}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -317,7 +337,7 @@ const BahanBaku = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada BahanBaku....
+              Belum ada Pengeluaran Lain....
             </Alert>
           </div>
         )}
@@ -368,4 +388,4 @@ const BahanBaku = () => {
   );
 };
 
-export default BahanBaku;
+export default PengeluaranLain;

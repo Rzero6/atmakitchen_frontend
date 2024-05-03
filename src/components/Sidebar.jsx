@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "./sidebar.css";
 import { Sidebar, Menu, MenuItem, menuClasses } from "react-pro-sidebar";
 import { Button, Row, Col, Stack } from "react-bootstrap";
-import LogoutConfirmation from "../../components/modals/LogoutConfirmation";
+import LogoutConfirmation from "./modals/LogoutConfirmation";
 import { Icon } from "@mui/material";
 
 export const SidebarComp = ({ routes }) => {

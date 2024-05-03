@@ -1,5 +1,5 @@
 import React from "react";
-import { NumericFormat } from "react-number-format";
+import { NumericFormat, PatternFormat } from "react-number-format";
 
 export const MoneyFormat = React.forwardRef(function NumericFormatCustom(
   props,
@@ -50,6 +50,30 @@ export const NumberFormat = React.forwardRef(function NumericFormatCustom(
       decimalSeparator=","
       valueIsNumericString
       decimalScale={0}
+    />
+  );
+});
+
+export const PhoneNumberFormat = React.forwardRef(function NumericFormatCustom(
+  props,
+  ref
+) {
+  const { onChange, ...other } = props;
+
+  return (
+    <PatternFormat
+      {...other}
+      getInputRef={ref}
+      onValueChange={(values) => {
+        onChange({
+          target: {
+            name: props.name,
+            value: values.value,
+          },
+        });
+      }}
+      valueIsNumericString
+      format="####-####-####"
     />
   );
 });

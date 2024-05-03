@@ -13,25 +13,56 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
-  CreatePenitip,
-  DeletePenitip,
-  GetAllPenitip,
-  UpdatePenitip,
-} from "../../../api/apiPenitip";
+  CreateKaryawan,
+  DeleteKaryawan,
+  GetAllKaryawan,
+  UpdateKaryawan,
+} from "../../../api/apiKaryawan";
 import CustomTable from "../../../components/CustomTable";
-import { TextField } from "@mui/material";
+import {
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import { toast } from "react-toastify";
+import {
+  MoneyFormat,
+  NumberFormat,
+  PhoneNumberFormat,
+} from "../../../components/NumericFormat";
+import { GetAllRole } from "../../../api/apiRole";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 100 },
-  { id: "no_telp", label: "Nomor Telepon", minWidth: 100 },
+  { id: "jabatan", label: "Jabatan", minWidth: 100 },
+  { id: "nama", label: "Nama", minWidth: 200 },
+  {
+    id: "email",
+    label: "Email",
+    minWidth: 100,
+  },
+  {
+    id: "no_telepon",
+    label: "Nomor Telepon",
+    minWidth: 100,
+    format: (value) => {
+      let formattedValue = value.replace(/(.{4})/g, "$1-");
+      if (formattedValue.endsWith("-")) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
+      return formattedValue;
+    },
+  },
 ];
 
-const Penitip = () => {
+const Karyawan = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [penitip, setPenitip] = useState([]);
+  const [karyawan, setKaryawan] = useState([]);
+  const [role, setRole] = useState([]);
+  const [roleMap, setRoleMap] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -40,37 +71,79 @@ const Penitip = () => {
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [data, setData] = useState({
     nama: "",
-    no_telp: "",
+    email: "",
+    no_telepon: "",
+    id_role: "",
   });
   const handleChange = (event) => {
-    if (event.target.name === "no_telp" && isNaN(event.target.value)) return;
-    setData({ ...data, [event.target.name]: event.target.value });
+    if (event.target.name === "nama") {
+      const formattedEmail = formatEmailFromName(event.target.value);
+      setData({
+        ...data,
+        [event.target.name]: event.target.value,
+        email: formattedEmail,
+      });
+    } else {
+      setData({ ...data, [event.target.name]: event.target.value });
+    }
+  };
+
+  const formatEmailFromName = (nama) => {
+    const formattedName = nama.replace(/[^\w\s]/gi, "").replace(/\s/g, "");
+    return formattedName.toLowerCase() + "@atmakitchen.com";
   };
 
   const handleRowClick = (row) => {
+    clearAll();
     setSelectedRow(row);
     setIsEditDisabled(false);
     setIsDelDisabled(false);
     setData(row);
   };
-  const fetchPenitip = () => {
-    setIsLoading(true);
-    GetAllPenitip()
+  const fetchRoles = () => {
+    GetAllRole()
       .then((response) => {
-        setPenitip(response);
+        const rolesMap = {};
+        setRole(response);
+        response.forEach((role) => {
+          roleMap[role.id] = role.nama;
+        });
+        setRoleMap(rolesMap);
       })
       .catch((err) => {
         console.log(err);
+      });
+  };
+  const fetchKaryawan = () => {
+    setIsLoading(true);
+    fetchRoles();
+    GetAllKaryawan()
+      .then((response) => {
+        const karyawanWithJabatan = response.map((karyawan) => ({
+          ...karyawan,
+          jabatan: roleMap[karyawan.id_role],
+        }));
+        const filteredKaryawanWithJabatan = karyawanWithJabatan.filter(
+          (karyawan) => {
+            return karyawan.jabatan !== "Owner";
+          }
+        );
+        setKaryawan(filteredKaryawanWithJabatan);
+        setIsLoading(false);
       })
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        setIsLoading(false);
+        console.log(err);
+        toast.err(err);
+      });
   };
 
   useEffect(() => {
-    fetchPenitip();
+    fetchKaryawan();
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", no_telp: "" });
+    setData({ nama: "", email: "", id_role: "", no_telepon: "" });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -94,7 +167,7 @@ const Penitip = () => {
 
   const delData = (id) => {
     setIsPending(true);
-    DeletePenitip(id)
+    DeleteKaryawan(id)
       .then((response) => {
         setIsPending(false);
         toast.success(response.message);
@@ -117,7 +190,7 @@ const Penitip = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
-    fetchPenitip();
+    fetchKaryawan();
   };
 
   const submitData = (event) => {
@@ -125,35 +198,37 @@ const Penitip = () => {
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdatePenitip(data)
+      UpdateKaryawan(data)
         .then((response) => {
           toast.success(response.message);
         })
         .catch((err) => {
           console.log(err);
-          toast(err.message);
+          toast.error(JSON.stringify(err.message));
         })
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchKaryawan();
         });
     } else {
       const formData = new FormData();
       formData.append("nama", data.nama);
-      formData.append("no_telp", data.no_telp);
-      CreatePenitip(formData)
+      formData.append("email", data.email);
+      formData.append("id_role", data.id_role);
+      formData.append("no_telepon", data.no_telepon);
+      CreateKaryawan(formData)
         .then((response) => {
           toast.success(response.message);
         })
         .catch((err) => {
           console.log(err);
-          toast.dark(JSON.stringify(err.message));
+          toast.error(JSON.stringify(err.message));
         })
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchKaryawan();
         });
     }
   };
@@ -165,7 +240,7 @@ const Penitip = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">Penitip</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Karyawan</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
 
@@ -190,13 +265,50 @@ const Penitip = () => {
                   />
                 </Col>
                 <Col>
+                  <FormControl fullWidth>
+                    <InputLabel id="label-jabatan">Jabatan</InputLabel>
+                    <Select
+                      disabled={!isFilling}
+                      labelId="label-jabatan"
+                      label="Jabatan"
+                      value={data.id_role}
+                      name="id_role"
+                      onChange={handleChange}
+                    >
+                      {role.map(
+                        (role) =>
+                          role.nama !== "Customer" &&
+                          role.nama !== "Owner" && (
+                            <MenuItem key={role.id} value={role.id}>
+                              {role.nama}
+                            </MenuItem>
+                          )
+                      )}
+                    </Select>
+                  </FormControl>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    variant="outlined"
+                    color="primary"
+                    value={data.email}
+                    disabled
+                  />
+                </Col>
+                <Col>
                   <TextField
                     fullWidth
                     label="Nomor Telepon"
-                    name="no_telp"
+                    name="no_telepon"
                     variant="outlined"
                     color="primary"
-                    value={data.no_telp}
+                    value={data.no_telepon}
+                    InputProps={{ inputComponent: PhoneNumberFormat }}
                     disabled={!isFilling}
                     onChange={handleChange}
                   />
@@ -211,7 +323,10 @@ const Penitip = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" || data.no_telp.trim() === ""
+                      data.nama.trim() === "" ||
+                      (typeof data.id_role === "string"
+                        ? data.id_role.trim() === ""
+                        : data.id_role === "")
                     }
                   >
                     {isPending ? (
@@ -276,10 +391,10 @@ const Penitip = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : penitip?.length > 0 ? (
+        ) : karyawan?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={penitip}
+            data={karyawan}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -288,7 +403,7 @@ const Penitip = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada Penitip....
+              Belum ada Karyawan....
             </Alert>
           </div>
         )}
@@ -339,4 +454,4 @@ const Penitip = () => {
   );
 };
 
-export default Penitip;
+export default Karyawan;

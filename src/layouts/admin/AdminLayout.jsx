@@ -1,13 +1,15 @@
-import { SidebarComp } from "../admin/Sidebar";
+import { SidebarComp } from "../../components/Sidebar";
 import { Outlet } from "react-router-dom";
 import {
   FaUser,
   FaMoneyBillWave,
   FaPeopleCarry,
   FaBoxOpen,
+  FaList,
+  FaGift,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
-
+import { LuCakeSlice } from "react-icons/lu";
 const routes = [
   {
     path: "/admin",
@@ -15,14 +17,19 @@ const routes = [
     icon: <MdDashboard />,
   },
   {
-    path: "/admin/pengguna",
-    name: "Pengguna",
+    path: "/admin/pelanggan",
+    name: "Pelanggan",
     icon: <FaUser />,
   },
   {
-    path: "/admin/penitip",
-    name: "Penitip",
-    icon: <FaPeopleCarry />,
+    path: "/admin/produk",
+    name: "Produk",
+    icon: <LuCakeSlice />,
+  },
+  {
+    path: "/admin/resep",
+    name: "Resep",
+    icon: <FaList />,
   },
   {
     path: "/admin/bahanbaku",
@@ -30,9 +37,9 @@ const routes = [
     icon: <FaBoxOpen />,
   },
   {
-    path: "/admin/pengeluaran",
-    name: "Pengeluaran",
-    icon: <FaMoneyBillWave />,
+    path: "/admin/hampers",
+    name: "Hampers",
+    icon: <FaGift />,
   },
 ];
 

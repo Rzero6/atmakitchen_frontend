@@ -59,7 +59,13 @@ const FormLogin = () => {
         sessionStorage.setItem("user", JSON.stringify(res.user));
         sessionStorage.setItem("role", userRole.nama);
         if (userRole.nama === "Customer") navigate("/");
-        else navigate("/admin");
+        else if (userRole.nama === "Owner") navigate("/owner");
+        else if (userRole.nama === "Manager Operasional") navigate("/mo");
+        else if (userRole.nama === "Admin") navigate("/admin");
+        else {
+          toast.error("unauthorized");
+          return;
+        }
         toast.success(res.message);
       })
       .catch((err) => {
