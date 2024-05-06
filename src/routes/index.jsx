@@ -21,6 +21,7 @@ import Hampers from "../layouts/admin/pages/Hampers";
 import CustomerProtectedRoutes from "./CustomerProtectedRoutes";
 import Profile from "../layouts/user/pages/Profile";
 import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
+import Resep from "../layouts/admin/pages/Resep";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -69,7 +70,7 @@ const router = createBrowserRouter([
           { path: "/admin/pelanggan", element: <Customer /> },
           { path: "/admin/bahanbaku", element: <BahanBaku /> },
           { path: "/admin/produk", element: <Produk /> },
-          // { path: "/admin/resep", element: <Resep /> },
+          { path: "/admin/resep", element: <Resep /> },
           { path: "/admin/hampers", element: <Hampers /> },
         ],
       },
