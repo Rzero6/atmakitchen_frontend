@@ -26,7 +26,7 @@ const LogoutConfirmation = () => {
       <MenuItem className="mt-5" icon={<MdLogout />} onClick={handleShow}>
         Logout
       </MenuItem>
-      <Modal show={show} onHide={handleClose}>
+      <Modal centered show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Logout</Modal.Title>
         </Modal.Header>
