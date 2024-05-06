@@ -18,6 +18,7 @@ import MOLayout from "../layouts/mo/MOLayout";
 import Karyawan from "../layouts/mo/pages/Karyawan";
 import Produk from "../layouts/admin/pages/Produk";
 import Hampers from "../layouts/admin/pages/Hampers";
+import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -70,7 +71,7 @@ const router = createBrowserRouter([
           // { path: "/mo/jabatan", element: <Customer /> },
           { path: "/mo/karyawan", element: <Karyawan /> },
           { path: "/mo/penitip", element: <Penitip /> },
-          // { path: "/mo/pembelian-bahanbaku", element: <PengeluaranLain /> },
+          { path: "/mo/pembelian-bahanbaku", element: <PembelianBahanBaku /> },
           { path: "/mo/pengeluaran-lain", element: <PengeluaranLain /> },
         ],
       },
