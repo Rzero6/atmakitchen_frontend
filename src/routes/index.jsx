@@ -16,6 +16,8 @@ import { ResetPasswordPage } from "../layouts/ResetPassword";
 import OwnerLayout from "../layouts/owner/OwnerLayout";
 import MOLayout from "../layouts/mo/MOLayout";
 import Karyawan from "../layouts/mo/pages/Karyawan";
+import Produk from "../layouts/admin/pages/Produk";
+import Hampers from "../layouts/admin/pages/Hampers";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -51,9 +53,9 @@ const router = createBrowserRouter([
           { path: "/admin", element: <Dashboard /> },
           { path: "/admin/pelanggan", element: <Customer /> },
           { path: "/admin/bahanbaku", element: <BahanBaku /> },
-          // { path: "/admin/produk", element: <Produk /> },
+          { path: "/admin/produk", element: <Produk /> },
           // { path: "/admin/resep", element: <Resep /> },
-          // { path: "/admin/hampers", element: <Hampers /> },
+          { path: "/admin/hampers", element: <Hampers /> },
         ],
       },
       {
