@@ -16,4 +16,19 @@ const ResetPassword = async (data) => {
     throw error.response.data;
   }
 };
-export { SignIn, ResetPassword };
+
+const UpdatePassword = async (data) => {
+  try {
+    const response = await useAxios.put(`/password/update/${data.id}`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export { SignIn, ResetPassword, UpdatePassword };
