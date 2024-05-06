@@ -71,7 +71,7 @@ const FormLogin = () => {
       .catch((err) => {
         console.log(err);
         setFailedAttempt(true);
-        toast.dark(err.message);
+        toast.error(err.message);
       })
       .finally(() => {
         setLoading(false);

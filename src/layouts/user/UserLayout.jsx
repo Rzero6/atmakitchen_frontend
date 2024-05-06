@@ -7,6 +7,14 @@ const routes = [
     path: "/",
     name: "Home",
   },
+  {
+    path: "/produk",
+    name: "Produk",
+  },
+  {
+    path: "/tentang",
+    name: "Tentang",
+  },
 ];
 const UserLayout = ({ children }) => {
   return (

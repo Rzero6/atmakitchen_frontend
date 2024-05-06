@@ -18,6 +18,9 @@ import MOLayout from "../layouts/mo/MOLayout";
 import Karyawan from "../layouts/mo/pages/Karyawan";
 import Produk from "../layouts/admin/pages/Produk";
 import Hampers from "../layouts/admin/pages/Hampers";
+import CustomerProtectedRoutes from "./CustomerProtectedRoutes";
+import Profile from "../layouts/user/pages/Profile";
+import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
 const router = createBrowserRouter([
   {
     path: "*",
@@ -40,6 +43,18 @@ const router = createBrowserRouter([
             path: "/password/reset",
             element: <ResetPasswordPage />,
           },
+        ],
+      },
+      {
+        path: "/",
+        element: (
+          <CustomerProtectedRoutes>
+            <UserLayout />
+          </CustomerProtectedRoutes>
+        ),
+        children: [
+          { path: "/profile", element: <Profile /> },
+          { path: "/riwayat-pesanan", element: <RiwayatPesanan /> },
         ],
       },
       {
