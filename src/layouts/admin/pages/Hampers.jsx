@@ -248,10 +248,7 @@ const Hampers = () => {
           <Form>
             <Row>
               <Col>
-                <div
-                  className="img-preview text-center position-relative mb-3"
-                  style={{ aspectRatio: "16 / 9.25" }}
-                >
+                <div className="img-preview text-center position-relative mb-3">
                   {thumbnail ? (
                     <img
                       src={URL.createObjectURL(thumbnail)}
@@ -287,47 +284,49 @@ const Hampers = () => {
                 </div>
               </Col>
               <Col>
-                <Row className="mb-2">
+                <Row className="mb-3">
                   <Col>
                     <FormControl fullWidth>
-                      <InputLabel id="label-jabatan">ID Produk 1</InputLabel>
+                      <InputLabel id="label-produk1">Produk 1</InputLabel>
                       <Select
                         disabled={!isFilling}
-                        labelId="label-jabatan"
-                        label="Jabatan"
+                        labelId="label-produk1"
+                        label="Produk 1"
                         value={data.id_produk1}
                         name="id_produk1"
                         onChange={handleChange}
                       >
                         {produk1.map((produk) => (
                           <MenuItem key={produk.id} value={produk.id}>
-                            {produk.nama}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Col>
-                  <Col>
-                    <FormControl fullWidth>
-                      <InputLabel id="label-jabatan">ID Produk 2</InputLabel>
-                      <Select
-                        disabled={!isFilling}
-                        labelId="label-jabatan"
-                        label="Jabatan"
-                        value={data.id_produk2}
-                        name="id_produk2"
-                        onChange={handleChange}
-                      >
-                        {produk2.map((produk) => (
-                          <MenuItem key={produk.id} value={produk.id}>
-                            {produk.nama}
+                            {produk.nama} {produk.ukuran}
                           </MenuItem>
                         ))}
                       </Select>
                     </FormControl>
                   </Col>
                 </Row>
-                <Row className="mb-2">
+                <Row className="mb-3">
+                  <Col>
+                    <FormControl fullWidth>
+                      <InputLabel id="label-produk2">Produk 2</InputLabel>
+                      <Select
+                        disabled={!isFilling}
+                        labelId="label-produk2"
+                        label="Produk 2"
+                        value={data.id_produk2}
+                        name="id_produk2"
+                        onChange={handleChange}
+                      >
+                        {produk2.map((produk) => (
+                          <MenuItem key={produk.id} value={produk.id}>
+                            {produk.nama} {produk.ukuran}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Col>
+                </Row>
+                <Row className="mb-3">
                   <Col>
                     <TextField
                       fullWidth
@@ -368,12 +367,10 @@ const Hampers = () => {
                     />
                   </Col>
                 </Row>
-                <Row></Row>
               </Col>
             </Row>
-            <Row></Row>
 
-            <Stack direction="horizontal" gap={3}>
+            <Stack direction="horizontal" gap={3} className="mt-2">
               {isAddDisabled ? (
                 <Button
                   style={{ width: "100px" }}
