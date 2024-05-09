@@ -12,7 +12,10 @@ const CustomerProtectedRoutes = ({ children }) => {
     setToken(tokenDariSS);
     if (userRole !== "Customer") {
       toast.dark("Unauthorized");
-      navigate("/");
+      if (userRole === "Admin") navigate("/admin");
+      else if (userRole === "Manager Operasional") navigate("/mo");
+      else if (userRole === "Owner") navigate("/owner");
+      else navigate("/login");
     }
     if (!tokenDariSS) {
       navigate("/login");

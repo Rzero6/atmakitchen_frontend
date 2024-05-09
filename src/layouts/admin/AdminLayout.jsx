@@ -9,7 +9,8 @@ import {
   FaGift,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
-import { LuCakeSlice } from "react-icons/lu";
+import { SiCakephp } from "react-icons/si";
+import { RiLockPasswordFill } from "react-icons/ri";
 const routes = [
   {
     path: "/admin",
@@ -24,7 +25,7 @@ const routes = [
   {
     path: "/admin/produk",
     name: "Produk",
-    icon: <LuCakeSlice />,
+    icon: <SiCakephp />,
   },
   {
     path: "/admin/resep",
@@ -40,6 +41,11 @@ const routes = [
     path: "/admin/hampers",
     name: "Hampers",
     icon: <FaGift />,
+  },
+  {
+    path: "/admin/change-password",
+    name: "Ubah Password",
+    icon: <RiLockPasswordFill />,
   },
 ];
 

@@ -25,7 +25,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/en";
 import { GoVerified, GoUnverified } from "react-icons/go";
 import { validate } from "react-email-validator";
-import { GetTransaksiByCustomerId } from "../../../api/apiTransaksi";
+import { GetTransaksiByUserId } from "../../../api/apiTransaksi";
 
 const RiwayatPesanan = () => {
   const [isPending, setIsPending] = useState(false);
@@ -38,8 +38,7 @@ const RiwayatPesanan = () => {
   const [transaksi, setTransaksi] = useState([]);
   const fetchTransaksi = () => {
     setIsPending(true);
-    console.log(user.id);
-    GetTransaksiByCustomerId(user.id)
+    GetTransaksiByUserId(user.id)
       .then((response) => {
         setTransaksi(response);
       })
