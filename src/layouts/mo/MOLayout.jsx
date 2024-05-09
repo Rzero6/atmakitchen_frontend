@@ -9,6 +9,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FaPeopleGroup, FaRankingStar } from "react-icons/fa6";
 import { GiTakeMyMoney } from "react-icons/gi";
+import { RiLockPasswordFill } from "react-icons/ri";
 const routes = [
   {
     path: "/mo",
@@ -39,6 +40,11 @@ const routes = [
     path: "/mo/pengeluaran-lain",
     name: "Pengeluaran Lain",
     icon: <FaMoneyBillWave />,
+  },
+  {
+    path: "/mo/change-password",
+    name: "Ubah Password",
+    icon: <RiLockPasswordFill />,
   },
 ];
 

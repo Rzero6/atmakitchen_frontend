@@ -11,8 +11,10 @@ const MOProtectedRoutes = ({ children }) => {
     const userRole = sessionStorage.getItem("role");
     setToken(tokenDariSS);
     if (userRole !== "Manager Operasional") {
-      toast.dark("Unauthorized");
-      navigate("/");
+      if (userRole === "Customer") navigate("/");
+      else if (userRole === "Admin") navigate("/admin");
+      else if (userRole === "Owner") navigate("/owner");
+      else navigate("/login");
     }
     if (!tokenDariSS) {
       navigate("/login");

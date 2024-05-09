@@ -10,6 +10,7 @@ import {
   Stack,
   Spinner,
   FormControl,
+  Card,
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import { GetAllCustomer } from "../../../api/apiCustomer";
@@ -17,6 +18,8 @@ import CustomTable from "../../../components/CustomTable";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import "dayjs/locale/en";
+import { GetTransaksiByUserId } from "../../../api/apiTransaksi";
 export const tableHeader = [
   { id: "nama", label: "Nama", minWidth: 100 },
   { id: "email", label: "Email", minWidth: 100 },
@@ -40,10 +43,24 @@ export const tableHeader = [
 ];
 
 const Customer = () => {
+  const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [customer, setCustomer] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [data, setData] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [transaksi, setTransaksi] = useState([]);
 
-  const handleRowClick = () => {};
+  const handleRowClick = (row) => {
+    fetchTransaksi(row.id_user);
+    handleShowModal();
+  };
+  const handleShowModal = () => {
+    setShowHistory(true);
+  };
+  const handleCloseModal = () => {
+    setShowHistory(false);
+  };
   const fetchCustomer = () => {
     setIsLoading(true);
     GetAllCustomer()
@@ -59,6 +76,19 @@ const Customer = () => {
         console.log(err);
       })
       .finally(() => setIsLoading(false));
+  };
+  const fetchTransaksi = (id) => {
+    setIsPending(true);
+    GetTransaksiByUserId(id)
+      .then((response) => {
+        setTransaksi(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
   };
 
   useEffect(() => {
@@ -100,6 +130,68 @@ const Customer = () => {
           </Alert>
         </div>
       )}
+
+      <Modal centered show={showHistory} onHide={handleCloseModal} scrollable>
+        <Modal.Header closeButton>
+          <Modal.Title>Riwayat Pesanan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {isPending ? (
+            <div className="d-flex align-items-center justify-content-center">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : transaksi?.length > 0 ? (
+            transaksi.map((atransaksi, index) => (
+              <Card
+                key={index}
+                className="p-4"
+                style={{ width: "100%", height: "50%" }}
+              >
+                <p>
+                  {dayjs(atransaksi.tanggal_penerimaan)
+                    .locale("en")
+                    .format("dddd, DD MMM YYYY")}
+                </p>
+                <p>
+                  Alamat : {atransaksi.alamat.jalan}, {atransaksi.alamat.kota}
+                </p>
+                <p>
+                  Barang yang dibeli:
+                  {atransaksi.detail.map((adetail, index2) => (
+                    <span key={index2}>
+                      {adetail.produk
+                        ? adetail.produk.nama
+                        : adetail.hampers.nama}
+                      {index2 !== atransaksi.detail.length - 1 && ", "}
+                    </span>
+                  ))}
+                </p>
+                <p>
+                  Total Pembayaran:{" "}
+                  {atransaksi.detail.reduce((total, adetail) => {
+                    const hargaProduk = adetail.produk
+                      ? adetail.produk.harga * adetail.jumlah
+                      : 0;
+                    const hargaHampers = adetail.hampers
+                      ? adetail.hampers.harga * adetail.jumlah
+                      : 0;
+                    return total + hargaProduk + hargaHampers;
+                  }, 0) + atransaksi.tip}
+                </p>
+              </Card>
+            ))
+          ) : (
+            <>
+              <Alert>Belum ada riwayat pesanan</Alert>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
