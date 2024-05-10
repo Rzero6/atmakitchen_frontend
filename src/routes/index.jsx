@@ -24,6 +24,7 @@ import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
 import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 import Resep from "../layouts/admin/pages/Resep";
 import { ChangePasswordPage } from "../layouts/changePassword";
+import GajiDanBonus from "../layouts/owner/pages/GajiDanBonus";
 
 const router = createBrowserRouter([
   {
@@ -106,7 +107,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/owner", element: <Dashboard /> },
           { path: "/owner/change-password", element: <ChangePasswordPage /> },
-          // { path: "/owner/gaji-bonus", element: <Penitip /> },
+          { path: "/owner/gaji-bonus", element: <GajiDanBonus /> },
         ],
       },
     ],
