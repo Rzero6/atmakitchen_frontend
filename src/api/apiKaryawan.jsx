@@ -43,12 +43,16 @@ export const GetKaryawanById = async (id) => {
 
 export const UpdateKaryawan = async (values) => {
   try {
-    const response = await useAxios.put(`/karyawan/${values.id}`, values, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-      },
-    });
+    const response = await useAxios.put(
+      `/karyawan/${values.id_user}`,
+      values,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -64,6 +68,24 @@ export const DeleteKaryawan = async (id) => {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const UpdateGajiBonusKaryawan = async (values) => {
+  try {
+    const response = await useAxios.put(
+      `/karyawan/gaji-bonus/${values.id}`,
+      values,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response.data;

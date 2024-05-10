@@ -26,6 +26,18 @@ export const CreateProduk = async (data) => {
     throw error.response.data;
   }
 };
+export const CreateProdukPenitip = async (data) => {
+  try {
+    const response = await useAxios.post("/produk/penitip", data, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
 export const GetProdukById = async (id) => {
   try {
