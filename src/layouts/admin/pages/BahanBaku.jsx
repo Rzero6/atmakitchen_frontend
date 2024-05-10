@@ -19,9 +19,9 @@ import {
   UpdateBahanBaku,
 } from "../../../api/apiBahanBaku";
 import CustomTable from "../../../components/CustomTable";
-import { TextField } from "@mui/material";
+import { TextField, FormControlLabel, Switch } from "@mui/material";
 import { toast } from "react-toastify";
-import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
+import { NumberFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
   { id: "nama", label: "Nama", minWidth: 250 },
@@ -45,10 +45,12 @@ const BahanBaku = () => {
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [isPackaging, setIsPackaging] = useState(false);
   const [data, setData] = useState({
     nama: "",
     stok: "",
     satuan: "",
+    packaging: false,
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -57,6 +59,7 @@ const BahanBaku = () => {
   const handleRowClick = (row) => {
     clearAll();
     setSelectedRow(row);
+    setIsPackaging(row.packaging === 1);
     setIsEditDisabled(false);
     setIsDelDisabled(false);
     setData(row);
@@ -78,7 +81,8 @@ const BahanBaku = () => {
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", stok: "", satuan: "" });
+    setData({ nama: "", stok: "", satuan: "", packaging: false });
+    setIsPackaging(false);
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -133,6 +137,8 @@ const BahanBaku = () => {
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
+      setData({ ...data, packaging: isPackaging });
+      console.log(data.packaging);
       UpdateBahanBaku(data)
         .then((response) => {
           toast.success(response.message);
@@ -151,6 +157,7 @@ const BahanBaku = () => {
       formData.append("nama", data.nama);
       formData.append("stok", data.stok);
       formData.append("satuan", data.satuan);
+      if (isPackaging) formData.append("packaging", 1);
 
       CreateBahanBaku(formData)
         .then((response) => {
@@ -186,6 +193,26 @@ const BahanBaku = () => {
         >
           <Form>
             <Stack gap={3}>
+              <Row>
+                <Col className="text-end">
+                  <FormControlLabel
+                    name="packaging"
+                    value={isPackaging}
+                    control={
+                      <Switch
+                        color="primary"
+                        checked={isPackaging}
+                        onChange={() => {
+                          setIsPackaging(!isPackaging);
+                        }}
+                      />
+                    }
+                    label={isPackaging ? "Packaging" : "Bahan"}
+                    disabled={!isFilling}
+                    labelPlacement="start"
+                  />
+                </Col>
+              </Row>
               <Row>
                 <Col>
                   <TextField
@@ -240,7 +267,8 @@ const BahanBaku = () => {
                       (typeof data.stok === "string"
                         ? data.stok.trim() === ""
                         : data.stok === "") ||
-                      data.satuan.trim() === ""
+                      data.satuan.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -337,7 +365,11 @@ const BahanBaku = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

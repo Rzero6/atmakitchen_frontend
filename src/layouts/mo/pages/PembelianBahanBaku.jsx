@@ -13,37 +13,49 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
-  CreatePenitip,
-  DeletePenitip,
-  GetAllPenitip,
-  UpdatePenitip,
-} from "../../../api/apiPenitip";
+  CreatePembelianBahanBaku,
+  DeletePembelianBahanBaku,
+  GetAllPembelianBahanBaku,
+  UpdatePembelianBahanBaku,
+} from "../../../api/apiPembelianBahanBaku";
 import CustomTable from "../../../components/CustomTable";
-import { TextField } from "@mui/material";
+import {
+  TextField,
+  InputLabel,
+  FormControl,
+  Select,
+  FormControlLabel,
+  Switch,
+  Avatar,
+  MenuItem,
+} from "@mui/material";
 import { toast } from "react-toastify";
-import { PhoneNumberFormat } from "../../../components/NumericFormat";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
+import { GetAllBahanBaku } from "../../../api/apiBahanBaku";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 100 },
+  { id: "nama_bb", label: "Bahan Baku", minWidth: 100 },
+  { id: "jumlah", label: "Jumlah", minWidth: 100 },
   {
-    id: "no_telp",
-    label: "Nomor Telepon",
+    id: "harga",
+    label: "Harga",
     minWidth: 100,
-    format: (value) => {
-      let formattedValue = value.replace(/(.{4})/g, "$1-");
-      if (formattedValue.endsWith("-")) {
-        formattedValue = formattedValue.slice(0, -1);
-      }
-      return formattedValue;
-    },
+    format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
   },
+  { id: "tglPembelian", label: "Tanggal Pembelian", minWidth: 100 },
 ];
 
-const Penitip = () => {
+const PembelianBahanBaku = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [penitip, setPenitip] = useState([]);
+  const [pembelianBahanBaku, setPembelianBahanBaku] = useState([]);
+  const [bahanbaku, setBahanBaku] = useState([]);
+  const [bahanBakuMap, setBahanBakuMap] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -51,8 +63,10 @@ const Penitip = () => {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [data, setData] = useState({
-    nama: "",
-    no_telp: "",
+    id_bahanBaku: "",
+    jumlah: "",
+    tglPembelian: dayjs().format("YYYY-MM-DD"),
+    harga: "",
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -65,25 +79,50 @@ const Penitip = () => {
     setIsDelDisabled(false);
     setData(row);
   };
-  const fetchPenitip = () => {
+  const fetchPembelianBahanBaku = () => {
     setIsLoading(true);
-    GetAllPenitip()
+    fetchBahanBaku();
+    GetAllPembelianBahanBaku()
       .then((response) => {
-        setPenitip(response);
+        const pembelianWithNamaBB = response.map((pembelianBahanBaku) => ({
+          ...pembelianBahanBaku,
+          nama_bb: bahanBakuMap[pembelianBahanBaku.id_bahanBaku],
+        }));
+        setPembelianBahanBaku(pembelianWithNamaBB);
+        setIsLoading(false);
       })
       .catch((err) => {
-        toast.error(JSON.stringify(err.message));
         console.log(err);
+        setIsLoading(false);
+      });
+  };
+  // FETCH BAHAN BAKU
+  const fetchBahanBaku = () => {
+    GetAllBahanBaku()
+      .then((response) => {
+        const bahanBakusMap = {};
+        setBahanBaku(response);
+        response.forEach((bahanbaku) => {
+          bahanBakuMap[bahanbaku.id] = bahanbaku.nama;
+        });
+        setBahanBakuMap(bahanBakusMap);
       })
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   useEffect(() => {
-    fetchPenitip();
+    fetchPembelianBahanBaku();
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", no_telp: "" });
+    setData({
+      id_bahanBaku: "",
+      jumlah: "",
+      tglPembelian: dayjs().format("YYYY-MM-DD"),
+      harga: "",
+    });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -107,7 +146,7 @@ const Penitip = () => {
 
   const delData = (id) => {
     setIsPending(true);
-    DeletePenitip(id)
+    DeletePembelianBahanBaku(id)
       .then((response) => {
         setIsPending(false);
         toast.success(response.message);
@@ -130,15 +169,16 @@ const Penitip = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
-    fetchPenitip();
+    fetchPembelianBahanBaku();
   };
 
   const submitData = (event) => {
     event.preventDefault();
+    console.log(data.tglPembelian);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdatePenitip(data)
+      UpdatePembelianBahanBaku(data)
         .then((response) => {
           toast.success(response.message);
         })
@@ -149,13 +189,15 @@ const Penitip = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchPembelianBahanBaku();
         });
     } else {
       const formData = new FormData();
-      formData.append("nama", data.nama);
-      formData.append("no_telp", data.no_telp);
-      CreatePenitip(formData)
+      formData.append("id_bahanBaku", data.id_bahanBaku);
+      formData.append("jumlah", data.jumlah);
+      formData.append("tglPembelian", data.tglPembelian);
+      formData.append("harga", data.harga);
+      CreatePembelianBahanBaku(formData)
         .then((response) => {
           toast.success(response.message);
         })
@@ -166,7 +208,7 @@ const Penitip = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchPembelianBahanBaku();
         });
     }
   };
@@ -178,7 +220,7 @@ const Penitip = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">Penitip</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Pembelian Bahan Baku</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
 
@@ -191,28 +233,68 @@ const Penitip = () => {
             <Stack gap={3}>
               <Row>
                 <Col>
-                  <TextField
-                    fullWidth
-                    label="Nama"
-                    name="nama"
-                    variant="outlined"
-                    color="primary"
-                    value={data.nama}
-                    disabled={!isFilling}
-                    onChange={handleChange}
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel id="label-bahanbaku">Bahan Baku</InputLabel>
+                    <Select
+                      disabled={!isFilling}
+                      labelId="label-bahanbaku"
+                      label="Bahan Baku"
+                      value={data.id_bahanBaku}
+                      name="id_bahanBaku"
+                      onChange={handleChange}
+                    >
+                      {bahanbaku.map((bahanbaku) => (
+                        <MenuItem key={bahanbaku.id} value={bahanbaku.id}>
+                          {bahanbaku.nama}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Col>
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nomor Telepon"
-                    name="no_telp"
+                    label="Jumlah"
+                    name="jumlah"
                     variant="outlined"
                     color="primary"
-                    value={data.no_telp}
+                    value={data.jumlah}
                     disabled={!isFilling}
                     onChange={handleChange}
-                    InputProps={{ inputComponent: PhoneNumberFormat }}
+                    InputProps={{ inputComponent: NumberFormat }}
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Tanggal Pembelian"
+                      name="tglPembelian"
+                      disabled={!isFilling}
+                      onChange={(newValue) => {
+                        const formattedDate = newValue.format("YYYY-MM-DD");
+                        setData({
+                          ...data,
+                          tglPembelian: formattedDate,
+                        });
+                      }}
+                      value={dayjs(data.tglPembelian)}
+                      className="w-100"
+                    />
+                  </LocalizationProvider>
+                </Col>
+                <Col>
+                  <TextField
+                    fullWidth
+                    label="Harga"
+                    name="harga"
+                    variant="outlined"
+                    color="primary"
+                    value={data.harga}
+                    disabled={!isFilling}
+                    onChange={handleChange}
+                    InputProps={{ inputComponent: MoneyFormat }}
                   />
                 </Col>
               </Row>
@@ -225,8 +307,16 @@ const Penitip = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" ||
-                      data.no_telp.trim() === "" ||
+                      (typeof data.jumlah === "string"
+                        ? data.jumlah.trim() === ""
+                        : data.jumlah === "") ||
+                      (typeof data.id_bahanBaku === "string"
+                        ? data.id_bahanBaku.trim() === ""
+                        : data.id_bahanBaku === "") ||
+                      (typeof data.harga === "string"
+                        ? data.harga.trim() === ""
+                        : data.harga === "") ||
+                      data.tglPembelian.trim() === "" ||
                       isPending
                     }
                   >
@@ -292,10 +382,10 @@ const Penitip = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : penitip?.length > 0 ? (
+        ) : pembelianBahanBaku?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={penitip}
+            data={pembelianBahanBaku}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -304,7 +394,7 @@ const Penitip = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada Penitip....
+              Belum Ada Pembelian Bahan Baku....
             </Alert>
           </div>
         )}
@@ -359,4 +449,4 @@ const Penitip = () => {
   );
 };
 
-export default Penitip;
+export default PembelianBahanBaku;

@@ -2,7 +2,7 @@ import { useNavigate, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 /* eslint-disable react/prop-types */
-const MOProtectedRoutes = ({ children }) => {
+const CustomerProtectedRoutes = ({ children }) => {
   const navigate = useNavigate();
   const [token, setToken] = useState("");
   useEffect(() => {
@@ -10,9 +10,10 @@ const MOProtectedRoutes = ({ children }) => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     const userRole = sessionStorage.getItem("role");
     setToken(tokenDariSS);
-    if (userRole !== "Manager Operasional") {
-      if (userRole === "Customer") navigate("/");
-      else if (userRole === "Admin") navigate("/admin");
+    if (userRole !== "Customer") {
+      toast.dark("Unauthorized");
+      if (userRole === "Admin") navigate("/admin");
+      else if (userRole === "Manager Operasional") navigate("/mo");
       else if (userRole === "Owner") navigate("/owner");
       else navigate("/login");
     }
@@ -22,4 +23,4 @@ const MOProtectedRoutes = ({ children }) => {
   }, [navigate]);
   return token && (children ? children : <Outlet />);
 };
-export default MOProtectedRoutes;
+export default CustomerProtectedRoutes;

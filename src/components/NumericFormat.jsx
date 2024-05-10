@@ -32,7 +32,7 @@ export const NumberFormat = React.forwardRef(function NumericFormatCustom(
   props,
   ref
 ) {
-  const { onChange, ...other } = props;
+  const { onChange, disabled, ...other } = props;
 
   return (
     <NumericFormat
@@ -46,6 +46,7 @@ export const NumberFormat = React.forwardRef(function NumericFormatCustom(
           },
         });
       }}
+      disabled={disabled}
       thousandSeparator="."
       decimalSeparator=","
       valueIsNumericString

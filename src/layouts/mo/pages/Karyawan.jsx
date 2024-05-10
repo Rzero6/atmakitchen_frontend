@@ -121,7 +121,12 @@ const Karyawan = () => {
       .then((response) => {
         const karyawanWithJabatan = response.map((karyawan) => ({
           ...karyawan,
-          jabatan: roleMap[karyawan.id_role],
+          jabatan: roleMap[karyawan.user.id_role],
+          nama: karyawan.user.nama,
+          no_telepon: karyawan.user.no_telepon,
+          email: karyawan.user.email,
+          id_user: karyawan.user.id,
+          id_role: karyawan.user.id_role,
         }));
         const filteredKaryawanWithJabatan = karyawanWithJabatan.filter(
           (karyawan) => {
@@ -134,7 +139,7 @@ const Karyawan = () => {
       .catch((err) => {
         setIsLoading(false);
         console.log(err);
-        toast.err(err);
+        toast.error(err);
       });
   };
 
@@ -326,7 +331,8 @@ const Karyawan = () => {
                       data.nama.trim() === "" ||
                       (typeof data.id_role === "string"
                         ? data.id_role.trim() === ""
-                        : data.id_role === "")
+                        : data.id_role === "") ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -423,7 +429,11 @@ const Karyawan = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id_user)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

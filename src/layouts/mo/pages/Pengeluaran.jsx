@@ -25,6 +25,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import "dayjs/locale/en-gb";
 import { MoneyFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
@@ -216,7 +217,10 @@ const PengeluaranLain = () => {
               </Row>
               <Row>
                 <Col>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDayjs}
+                    adapterLocale="en-gb"
+                  >
                     <DatePicker
                       label="Tanggal Pengeluaran"
                       name="tanggal_pengeluaran"
@@ -260,7 +264,8 @@ const PengeluaranLain = () => {
                       (typeof data.nominal === "string"
                         ? data.nominal.trim() === ""
                         : data.nominal === "") ||
-                      data.tanggal_pengeluaran.trim() === ""
+                      data.tanggal_pengeluaran.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -357,7 +362,11 @@ const PengeluaranLain = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

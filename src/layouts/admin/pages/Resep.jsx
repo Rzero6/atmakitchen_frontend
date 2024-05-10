@@ -13,46 +13,50 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
-  CreatePenitip,
-  DeletePenitip,
-  GetAllPenitip,
-  UpdatePenitip,
-} from "../../../api/apiPenitip";
+  CreateResep,
+  DeleteResep,
+  GetAllResep,
+  UpdateResep,
+} from "../../../api/apiResep";
 import CustomTable from "../../../components/CustomTable";
-import { TextField } from "@mui/material";
+import {
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { toast } from "react-toastify";
-import { PhoneNumberFormat } from "../../../components/NumericFormat";
+import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
+import { GetAllBahanBaku } from "../../../api/apiBahanBaku";
+import { GetAllProduk } from "../../../api/apiProduk";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 100 },
-  {
-    id: "no_telp",
-    label: "Nomor Telepon",
-    minWidth: 100,
-    format: (value) => {
-      let formattedValue = value.replace(/(.{4})/g, "$1-");
-      if (formattedValue.endsWith("-")) {
-        formattedValue = formattedValue.slice(0, -1);
-      }
-      return formattedValue;
-    },
-  },
+  { id: "nama_produk", label: "Produk", minWidth: 100 },
+  { id: "nama_bb", label: "Bahan Baku", minWidth: 100 },
+  { id: "takaran_satuan", label: "Takaran", minWidth: 50 },
 ];
 
-const Penitip = () => {
+const Resep = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [penitip, setPenitip] = useState([]);
+  const [resep, setResep] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [produk, setProduk] = useState([]);
+  const [bahanBaku, setBahanBaku] = useState([]);
+  const [produkMap, setProdukMap] = useState([]);
+  const [bahanBakuMap, setBahanBakuMap] = useState([]);
+
   const [data, setData] = useState({
-    nama: "",
-    no_telp: "",
+    id_produk: "",
+    id_bahan_baku: "",
+    takaran: "",
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -65,25 +69,66 @@ const Penitip = () => {
     setIsDelDisabled(false);
     setData(row);
   };
-  const fetchPenitip = () => {
-    setIsLoading(true);
-    GetAllPenitip()
+  //FETCH PRODUK
+  const fetchProduk = () => {
+    GetAllProduk()
       .then((response) => {
-        setPenitip(response);
+        const produksMap = {};
+        setProduk(response);
+        response.forEach((produk) => {
+          produkMap[produk.id] = produk.nama;
+        });
+        setProdukMap(produksMap);
       })
       .catch((err) => {
-        toast.error(JSON.stringify(err.message));
         console.log(err);
+      });
+  };
+  //FETCH BAHANBAKU
+  const fetchBahanBaku = () => {
+    GetAllBahanBaku()
+      .then((response) => {
+        const bahanBakusMap = {};
+        setBahanBaku(response);
+        response.forEach((bahanBaku) => {
+          bahanBakuMap[bahanBaku.id] = bahanBaku;
+        });
+        setBahanBakuMap(bahanBakusMap);
       })
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const fetchResep = () => {
+    setIsLoading(true);
+    fetchBahanBaku();
+    fetchProduk();
+    GetAllResep()
+      .then((response) => {
+        const resepWithNamaPB = response.map((resep) => ({
+          ...resep,
+          nama_produk: produkMap[resep.id_produk],
+          nama_bb: bahanBakuMap[resep.id_bahan_baku].nama,
+          takaran_satuan: `${resep.takaran} ${
+            bahanBakuMap[resep.id_bahan_baku].satuan
+          }`,
+        }));
+
+        setResep(resepWithNamaPB);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
-    fetchPenitip();
+    fetchResep();
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", no_telp: "" });
+    setData({ id_produk: "", id_bahan_baku: "", takaran: "" });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -107,14 +152,14 @@ const Penitip = () => {
 
   const delData = (id) => {
     setIsPending(true);
-    DeletePenitip(id)
+    DeleteResep(id)
       .then((response) => {
         setIsPending(false);
         toast.success(response.message);
       })
       .catch((err) => {
         console.log(err);
-        toast.error(err.message);
+        toast.dark(err.message);
       })
       .finally(() => {
         setIsPending(false);
@@ -130,7 +175,7 @@ const Penitip = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
-    fetchPenitip();
+    fetchResep();
   };
 
   const submitData = (event) => {
@@ -138,7 +183,7 @@ const Penitip = () => {
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdatePenitip(data)
+      UpdateResep(data)
         .then((response) => {
           toast.success(response.message);
         })
@@ -149,13 +194,15 @@ const Penitip = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchResep();
         });
     } else {
       const formData = new FormData();
-      formData.append("nama", data.nama);
-      formData.append("no_telp", data.no_telp);
-      CreatePenitip(formData)
+      formData.append("id_produk", data.id_produk);
+      formData.append("id_bahan_baku", data.id_bahan_baku);
+      formData.append("takaran", data.takaran);
+
+      CreateResep(formData)
         .then((response) => {
           toast.success(response.message);
         })
@@ -166,7 +213,7 @@ const Penitip = () => {
         .finally(() => {
           setIsPending(false);
           clearAll();
-          fetchPenitip();
+          fetchResep();
         });
     }
   };
@@ -178,7 +225,7 @@ const Penitip = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">Penitip</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Resep</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
 
@@ -191,28 +238,55 @@ const Penitip = () => {
             <Stack gap={3}>
               <Row>
                 <Col>
-                  <TextField
-                    fullWidth
-                    label="Nama"
-                    name="nama"
-                    variant="outlined"
-                    color="primary"
-                    value={data.nama}
-                    disabled={!isFilling}
-                    onChange={handleChange}
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel id="id_produk">Produk</InputLabel>
+                    <Select
+                      disabled={!isFilling}
+                      labelId="id_produk"
+                      label="ID Produk"
+                      value={data.id_produk}
+                      name="id_produk"
+                      onChange={handleChange}
+                    >
+                      {produk.map((produk) => (
+                        <MenuItem key={produk.id} value={produk.id}>
+                          {produk.nama} {produk.ukuran}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Col>
+                <Col>
+                  <FormControl fullWidth>
+                    <InputLabel id="id_bahan_baku">Bahan Baku</InputLabel>
+                    <Select
+                      disabled={!isFilling}
+                      labelId="id_bahan_baku"
+                      label="ID Bahan Baku"
+                      value={data.id_bahan_baku}
+                      name="id_bahan_baku"
+                      onChange={handleChange}
+                    >
+                      {bahanBaku.map((bahanBaku) => (
+                        <MenuItem key={bahanBaku.id} value={bahanBaku.id}>
+                          {bahanBaku.nama}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Col>
+              </Row>
+              <Row>
                 <Col>
                   <TextField
                     fullWidth
-                    label="Nomor Telepon"
-                    name="no_telp"
+                    label="Takaran"
+                    name="takaran"
                     variant="outlined"
                     color="primary"
-                    value={data.no_telp}
+                    value={data.takaran}
                     disabled={!isFilling}
                     onChange={handleChange}
-                    InputProps={{ inputComponent: PhoneNumberFormat }}
                   />
                 </Col>
               </Row>
@@ -225,8 +299,9 @@ const Penitip = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" ||
-                      data.no_telp.trim() === "" ||
+                      data.id_produk === "" ||
+                      data.id_bahan_baku === "" ||
+                      data.takaran === "" ||
                       isPending
                     }
                   >
@@ -292,10 +367,10 @@ const Penitip = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : penitip?.length > 0 ? (
+        ) : resep?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={penitip}
+            data={resep}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -304,7 +379,7 @@ const Penitip = () => {
             style={{ height: "50vh" }}
           >
             <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada Penitip....
+              Belum ada Resep....
             </Alert>
           </div>
         )}
@@ -326,8 +401,8 @@ const Penitip = () => {
             >
               <Button
                 variant="primary"
-                disabled={isPending}
                 onClick={() => delData(selectedRow.id)}
+                disabled={isPending}
               >
                 {isPending ? (
                   <>
@@ -359,4 +434,4 @@ const Penitip = () => {
   );
 };
 
-export default Penitip;
+export default Resep;
