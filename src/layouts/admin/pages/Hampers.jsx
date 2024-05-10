@@ -33,6 +33,7 @@ import {
 import { toast } from "react-toastify";
 import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
 import { GetAllProduk } from "../../../api/apiProduk";
+import { getImageHampers } from "../../../api";
 
 export const tableHeader = [
   { id: "nama", label: "Nama Hampers", minWidth: 150 },
@@ -52,6 +53,8 @@ export const tableHeader = [
 ];
 
 const Hampers = () => {
+  const imagePlaceHolder =
+    "https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg";
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
@@ -74,6 +77,7 @@ const Hampers = () => {
     id_produk2: "",
     rincian: "",
     harga: "",
+    image: "",
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -115,6 +119,7 @@ const Hampers = () => {
       id_produk2: "",
       rincian: "",
       harga: "",
+      image: "",
     });
     setSelectedRow(null);
     setIsAddDisabled(false);
@@ -156,7 +161,6 @@ const Hampers = () => {
 
   const handleShowModal = (type) => {
     setShowModal(true);
-    console.log("show");
     setModalType(type);
   };
   const handleCloseModal = () => {
@@ -216,15 +220,16 @@ const Hampers = () => {
       CreateHampers(formData)
         .then((response) => {
           toast.success(response.message);
+          clearAll();
+          fetchHampers();
         })
         .catch((err) => {
           console.log(err);
-          toast.error(JSON.stringify(err.message));
+          if (err.message.image[0]) toast.error("Masukan gambar!");
+          else toast.error(JSON.stringify(err.message));
         })
         .finally(() => {
           setIsPending(false);
-          clearAll();
-          fetchHampers();
         });
     }
   };
@@ -248,7 +253,10 @@ const Hampers = () => {
           <Form>
             <Row>
               <Col>
-                <div className="img-preview text-center position-relative mb-3">
+                <div
+                  className="img-preview text-center position-relative mb-3"
+                  style={{ aspectRatio: "16 / 9.25" }}
+                >
                   {thumbnail ? (
                     <img
                       src={URL.createObjectURL(thumbnail)}
@@ -257,7 +265,11 @@ const Hampers = () => {
                     />
                   ) : (
                     <img
-                      src="https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg"
+                      src={
+                        data.image
+                          ? getImageHampers(data.image)
+                          : imagePlaceHolder
+                      }
                       alt="Thumbnail"
                       className="w-100 h-100 object-fit-cover"
                     />
@@ -389,7 +401,8 @@ const Hampers = () => {
                       : data.id_produk1 === "") ||
                     (typeof data.id_produk2 === "string"
                       ? data.id_produk2.trim() === ""
-                      : data.id_produk2 === "")
+                      : data.id_produk2 === "") ||
+                    isPending
                   }
                 >
                   {isPending ? (
@@ -483,7 +496,11 @@ const Hampers = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

@@ -7,7 +7,7 @@ import {
   FaBoxOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
-
+import { RiLockPasswordFill } from "react-icons/ri";
 const routes = [
   {
     path: "/owner",
@@ -18,6 +18,11 @@ const routes = [
     path: "/owner/gaji-bonus",
     name: "Gaji dan Bonus",
     icon: <FaMoneyBillWave />,
+  },
+  {
+    path: "/owner/change-password",
+    name: "Ubah Password",
+    icon: <RiLockPasswordFill />,
   },
 ];
 

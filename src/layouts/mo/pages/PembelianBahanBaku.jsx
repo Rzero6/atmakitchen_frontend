@@ -316,7 +316,8 @@ const PembelianBahanBaku = () => {
                       (typeof data.harga === "string"
                         ? data.harga.trim() === ""
                         : data.harga === "") ||
-                      data.tglPembelian.trim() === ""
+                      data.tglPembelian.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -413,7 +414,11 @@ const PembelianBahanBaku = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

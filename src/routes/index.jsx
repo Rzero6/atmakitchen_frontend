@@ -23,6 +23,8 @@ import Profile from "../layouts/user/pages/Profile";
 import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
 import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 import Resep from "../layouts/admin/pages/Resep";
+import { ChangePasswordPage } from "../layouts/changePassword";
+import GajiDanBonus from "../layouts/owner/pages/GajiDanBonus";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +60,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/profile", element: <Profile /> },
           { path: "/riwayat-pesanan", element: <RiwayatPesanan /> },
+          { path: "/change-password", element: <ChangePasswordPage /> },
         ],
       },
       {
@@ -74,6 +77,7 @@ const router = createBrowserRouter([
           { path: "/admin/produk", element: <Produk /> },
           { path: "/admin/resep", element: <Resep /> },
           { path: "/admin/hampers", element: <Hampers /> },
+          { path: "/admin/change-password", element: <ChangePasswordPage /> },
         ],
       },
       {
@@ -90,6 +94,7 @@ const router = createBrowserRouter([
           { path: "/mo/penitip", element: <Penitip /> },
           { path: "/mo/pembelian-bahanbaku", element: <PembelianBahanBaku /> },
           { path: "/mo/pengeluaran-lain", element: <PengeluaranLain /> },
+          { path: "/mo/change-password", element: <ChangePasswordPage /> },
         ],
       },
       {
@@ -101,7 +106,8 @@ const router = createBrowserRouter([
         ),
         children: [
           { path: "/owner", element: <Dashboard /> },
-          // { path: "/owner/gaji-bonus", element: <Penitip /> },
+          { path: "/owner/change-password", element: <ChangePasswordPage /> },
+          { path: "/owner/gaji-bonus", element: <GajiDanBonus /> },
         ],
       },
     ],

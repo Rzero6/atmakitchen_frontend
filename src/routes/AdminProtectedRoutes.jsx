@@ -12,7 +12,10 @@ const AdminProtectedRoutes = ({ children }) => {
     setToken(tokenDariSS);
     if (userRole !== "Admin") {
       toast.dark("Unauthorized");
-      navigate("/");
+      if (userRole === "Customer") navigate("/");
+      else if (userRole === "Manager Operasional") navigate("/mo");
+      else if (userRole === "Owner") navigate("/owner");
+      else navigate("/login");
     }
     if (!tokenDariSS) {
       navigate("/login");

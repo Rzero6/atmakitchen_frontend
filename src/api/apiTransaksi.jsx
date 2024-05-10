@@ -28,7 +28,7 @@ export const GetTransaksiById = async (id) => {
   }
 };
 
-export const GetTransaksiByCustomerId = async (id) => {
+export const GetTransaksiByUserId = async (id) => {
   try {
     const response = await useAxios.get(`customer/${id}/transaksi`, {
       headers: {

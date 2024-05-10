@@ -301,7 +301,8 @@ const Resep = () => {
                     disabled={
                       data.id_produk === "" ||
                       data.id_bahan_baku === "" ||
-                      data.takaran === ""
+                      data.takaran === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -398,7 +399,11 @@ const Resep = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                onClick={() => delData(selectedRow.id)}
+                disabled={isPending}
+              >
                 {isPending ? (
                   <>
                     <Spinner

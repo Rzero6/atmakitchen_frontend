@@ -264,7 +264,8 @@ const PengeluaranLain = () => {
                       (typeof data.nominal === "string"
                         ? data.nominal.trim() === ""
                         : data.nominal === "") ||
-                      data.tanggal_pengeluaran.trim() === ""
+                      data.tanggal_pengeluaran.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -361,7 +362,11 @@ const PengeluaranLain = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner

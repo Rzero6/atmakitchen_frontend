@@ -225,7 +225,9 @@ const Penitip = () => {
                     variant="success"
                     onClick={submitData}
                     disabled={
-                      data.nama.trim() === "" || data.no_telp.trim() === ""
+                      data.nama.trim() === "" ||
+                      data.no_telp.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -322,7 +324,11 @@ const Penitip = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={() => delData(selectedRow.id)}
+              >
                 {isPending ? (
                   <>
                     <Spinner
