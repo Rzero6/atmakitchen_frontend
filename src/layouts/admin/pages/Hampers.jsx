@@ -14,7 +14,9 @@ import {
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
+  CreateDetailHampers,
   CreateHampers,
+  DeleteAllDetailHampers,
   DeleteHampers,
   GetAllHampers,
   UpdateHampers,
@@ -29,54 +31,105 @@ import {
   Switch,
   Avatar,
   MenuItem,
+  Chip,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
 import { GetAllProduk } from "../../../api/apiProduk";
+import { getImageHampers } from "../../../api";
+import { GetAllBahanBaku } from "../../../api/apiBahanBaku";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama Hampers", minWidth: 150 },
-
-  {
-    id: "rincian",
-    label: "Rincian",
-    minWidth: 40,
-  },
+  { id: "nama", label: "Nama", minWidth: 150 },
 
   {
     id: "harga",
-    label: "Harga Hampers",
+    label: "Harga",
     minWidth: 40,
     format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
   },
 ];
 
 const Hampers = () => {
+  const imagePlaceHolder =
+    "https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg";
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
   const [hampers, setHampers] = useState([]);
   const [thumbnail, setThumbnail] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
-  const [produk1, setProduk1] = useState([]);
-  const [produk2, setProduk2] = useState([]);
-  const [produkMap1, setProdukMap1] = useState([]);
-  const [produkMap2, setProdukMap2] = useState([]);
+  const [produk, setProduk] = useState([]);
+  const [bahanBaku, setBahanBaku] = useState([]);
+  const [produkMap, setProdukMap] = useState([]);
+  const [bahanBakuMap, setBahanBakuMap] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
-  const [isTitipan, setIsTitipan] = useState(false);
-  const [data, setData] = useState({
+  const [isSaveModal, setIsSaveModal] = useState(true);
+  const [dataHampers, setDataHampers] = useState({
     nama: "",
-    id_produk1: "",
-    id_produk2: "",
-    rincian: "",
     harga: "",
+    image: "",
   });
-  const handleChange = (event) => {
-    setData({ ...data, [event.target.name]: event.target.value });
+  const [dataDetailHampers, setDataDetailHampers] = useState({
+    id_produk: "",
+    id_bahan_baku: "",
+    jumlah: 1,
+  });
+  const [detailHampers, setDetailHampers] = useState([]);
+  const [isIsi, setIsIsi] = useState(true);
+
+  const handleChangeHampers = (event) => {
+    setDataHampers({ ...dataHampers, [event.target.name]: event.target.value });
+  };
+  const handleChangeDetailHampers = (event) => {
+    if (event.target.name === "id_produk") {
+      setDataDetailHampers({
+        ...dataDetailHampers,
+        [event.target.name]: event.target.value,
+        id_bahan_baku: null,
+      });
+    } else if (event.target.name === "id_bahan_baku") {
+      setDataDetailHampers({
+        ...dataDetailHampers,
+        [event.target.name]: event.target.value,
+        id_produk: null,
+      });
+    } else {
+      setDataDetailHampers({
+        ...dataDetailHampers,
+        [event.target.name]: event.target.value,
+      });
+    }
+  };
+  const handleChangeIsi = (event) => {
+    setIsIsi(!isIsi);
+    if (isIsi)
+      setDataDetailHampers({ ...detailHampers, id_bahan_baku: "", jumlah: 1 });
+    else setDataDetailHampers({ ...detailHampers, id_produk: "", jumlah: 1 });
+  };
+  const handleAddDetailHampers = () => {
+    setDetailHampers((prevDetailHampers) => {
+      const isDuplicate = prevDetailHampers.some((item) => {
+        return (
+          item.id_produk === dataDetailHampers.id_produk &&
+          item.id_bahan_baku === dataDetailHampers.id_bahan_baku
+        );
+      });
+
+      if (isDuplicate) {
+        return prevDetailHampers.map((item) =>
+          item.id_produk === dataDetailHampers.id_produk &&
+          item.id_bahan_baku === dataDetailHampers.id_bahan_baku
+            ? dataDetailHampers
+            : item
+        );
+      } else {
+        return [...prevDetailHampers, dataDetailHampers];
+      }
+    });
   };
 
   const handleThumbnail = (event) => {
@@ -86,9 +139,11 @@ const Hampers = () => {
   const handleRowClick = (row) => {
     clearAll();
     setSelectedRow(row);
+    const selectedHamper = hampers.find((hamper) => hamper.id === row.id);
+    if (selectedHamper) setDetailHampers(selectedHamper.detail_hampers);
     setIsEditDisabled(false);
     setIsDelDisabled(false);
-    setData(row);
+    setDataHampers(row);
   };
   const fetchHampers = () => {
     setIsLoading(true);
@@ -102,20 +157,57 @@ const Hampers = () => {
       })
       .finally(() => setIsLoading(false));
   };
+  //FETCH PRODUK
+  const fetchProduk = () => {
+    GetAllProduk()
+      .then((response) => {
+        const produksMap = {};
+        setProduk(response);
+        response.forEach((produk) => {
+          produkMap[produk.id] = produk;
+        });
+        setProdukMap(produksMap);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
+  //Fetch Bahan Baku
+  const fetchBahanBaku = () => {
+    GetAllBahanBaku()
+      .then((response) => {
+        const filteredResponse = response.filter((item) => item.packaging);
+        const bahanBakusMap = {};
+        setBahanBaku(filteredResponse);
+        filteredResponse.forEach((bahanBaku) => {
+          bahanBakusMap[bahanBaku.id] = bahanBaku;
+        });
+        setBahanBakuMap(bahanBakusMap);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   useEffect(() => {
+    fetchBahanBaku();
+    fetchProduk();
     fetchHampers();
   }, []);
 
   const clearAll = () => {
     setThumbnail(null);
-    setData({
+    setDataHampers({
       nama: "",
-      id_produk1: "",
-      id_produk2: "",
-      rincian: "",
       harga: "",
+      image: "",
     });
+    setDataDetailHampers({
+      id_produk: "",
+      id_bahan_baku: "",
+      jumlah: 1,
+    });
+    setDetailHampers([]);
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -153,11 +245,20 @@ const Hampers = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
+  const handleClickChip = (item) => {
+    if (item.id_produk === null) {
+      setIsIsi(false);
+      setDataDetailHampers(item);
+    } else {
+      setIsIsi(true);
+      setDataDetailHampers(item);
+    }
+  };
+  const handleDeleteChip = (targetIndex) => {
+    const newArrayDetHam = detailHampers.filter(
+      (item, index) => index !== targetIndex
+    );
+    setDetailHampers(newArrayDetHam);
   };
   const handleCloseModal = () => {
     setShowModal(false);
@@ -165,68 +266,81 @@ const Hampers = () => {
     fetchHampers();
   };
 
-  //FETCH PRODUK
-  const fetchProduk = () => {
-    GetAllProduk()
-      .then((response) => {
-        const produksMap1 = {};
-        const produksMap2 = {};
-        setProduk1(response);
-        setProduk2(response);
-        response.forEach((produk) => {
-          produksMap1[produk.id] = produk.nama;
-          produksMap2[produk.id] = produk.nama;
-        });
-        setProdukMap1(produksMap1);
-        setProdukMap2(produksMap2);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
-      UpdateHampers(data)
+      UpdateHampers(dataHampers)
         .then((response) => {
-          toast.success(response.message);
+          submitDetailHampers(response.data.id);
         })
         .catch((err) => {
           console.log(err);
           toast.error(JSON.stringify(err.message));
-        })
-        .finally(() => {
           setIsPending(false);
-          clearAll();
-          fetchHampers();
         });
     } else {
       const formData = new FormData();
 
-      formData.append("nama", data.nama);
-      formData.append("id_produk1", data.id_produk1);
-      formData.append("id_produk2", data.id_produk2);
-      formData.append("rincian", data.rincian);
-      formData.append("harga", data.harga);
+      formData.append("nama", dataHampers.nama);
+      formData.append("harga", dataHampers.harga);
       formData.append("image", thumbnail);
 
       CreateHampers(formData)
         .then((response) => {
-          toast.success(response.message);
+          submitDetailHampers(response.data.id);
         })
         .catch((err) => {
           console.log(err);
-          toast.error(JSON.stringify(err.message));
-        })
-        .finally(() => {
+          if (err.message.image[0]) toast.error("Masukan gambar!");
+          else toast.error(JSON.stringify(err.message));
           setIsPending(false);
-          clearAll();
-          fetchHampers();
         });
     }
+  };
+  const submitDetailHampers = (idHampers) => {
+    setIsPending(true);
+    DeleteAllDetailHampers(idHampers)
+      .then(() => {
+        const createPromises = detailHampers.map((detail) => {
+          const formData = new FormData();
+          formData.append("id_hampers", idHampers);
+          if (detail.id_produk !== null) {
+            formData.append("id_produk", detail.id_produk);
+          } else {
+            formData.append("id_bahan_baku", detail.id_bahan_baku);
+          }
+          formData.append("jumlah", detail.jumlah);
+
+          return CreateDetailHampers(formData)
+            .then((response) => {
+              toast.success(response.message);
+            })
+            .catch((err) => {
+              console.log(err);
+              toast.error(JSON.stringify(err.message));
+            });
+        });
+
+        Promise.all(createPromises)
+          .then(() => {
+            setIsPending(false);
+            clearAll();
+            fetchHampers();
+          })
+          .catch((err) => {
+            setIsPending(false);
+            console.log(err);
+            toast.error(JSON.stringify(err.message));
+          });
+      })
+      .catch((err) => {
+        setIsPending(false);
+        console.log(err);
+        toast.error(JSON.stringify(err.message));
+      });
   };
 
   return (
@@ -248,7 +362,10 @@ const Hampers = () => {
           <Form>
             <Row>
               <Col>
-                <div className="img-preview text-center position-relative mb-3">
+                <div
+                  className="img-preview text-center position-relative mb-3"
+                  style={{ aspectRatio: "16 / 11.4" }}
+                >
                   {thumbnail ? (
                     <img
                       src={URL.createObjectURL(thumbnail)}
@@ -257,7 +374,11 @@ const Hampers = () => {
                     />
                   ) : (
                     <img
-                      src="https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg"
+                      src={
+                        dataHampers.image
+                          ? getImageHampers(dataHampers.image)
+                          : imagePlaceHolder
+                      }
                       alt="Thumbnail"
                       className="w-100 h-100 object-fit-cover"
                     />
@@ -286,59 +407,19 @@ const Hampers = () => {
               <Col>
                 <Row className="mb-3">
                   <Col>
-                    <FormControl fullWidth>
-                      <InputLabel id="label-produk1">Produk 1</InputLabel>
-                      <Select
-                        disabled={!isFilling}
-                        labelId="label-produk1"
-                        label="Produk 1"
-                        value={data.id_produk1}
-                        name="id_produk1"
-                        onChange={handleChange}
-                      >
-                        {produk1.map((produk) => (
-                          <MenuItem key={produk.id} value={produk.id}>
-                            {produk.nama} {produk.ukuran}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Col>
-                </Row>
-                <Row className="mb-3">
-                  <Col>
-                    <FormControl fullWidth>
-                      <InputLabel id="label-produk2">Produk 2</InputLabel>
-                      <Select
-                        disabled={!isFilling}
-                        labelId="label-produk2"
-                        label="Produk 2"
-                        value={data.id_produk2}
-                        name="id_produk2"
-                        onChange={handleChange}
-                      >
-                        {produk2.map((produk) => (
-                          <MenuItem key={produk.id} value={produk.id}>
-                            {produk.nama} {produk.ukuran}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Col>
-                </Row>
-                <Row className="mb-3">
-                  <Col>
                     <TextField
                       fullWidth
                       label="Nama"
                       name="nama"
                       variant="outlined"
                       color="primary"
-                      value={data.nama}
+                      value={dataHampers.nama}
                       disabled={!isFilling}
-                      onChange={handleChange}
+                      onChange={handleChangeHampers}
                     />
                   </Col>
+                </Row>
+                <Row className="mb-3">
                   <Col>
                     <TextField
                       fullWidth
@@ -346,50 +427,168 @@ const Hampers = () => {
                       name="harga"
                       variant="outlined"
                       color="primary"
-                      value={data.harga}
+                      value={dataHampers.harga}
                       disabled={!isFilling}
-                      onChange={handleChange}
-                      InputProps={{ inputComponent: NumberFormat }}
+                      onChange={handleChangeHampers}
+                      InputProps={{ inputComponent: MoneyFormat }}
                     />
+                  </Col>
+                </Row>
+                <Stack
+                  direction="horizontal"
+                  gap={3}
+                  className="mb-2 justify-content-center"
+                >
+                  <p className="h4 fw-bold mb-0 text-nowrap">Isi</p>
+                  <hr className="border-top border-dark border-3 opacity-100 w-100" />
+                  <FormControlLabel
+                    disabled={!isFilling}
+                    value={isIsi}
+                    control={
+                      <Switch
+                        color="primary"
+                        onChange={handleChangeIsi}
+                        checked={isIsi}
+                      />
+                    }
+                    label={isIsi ? "Produk" : "Packaging"}
+                    labelPlacement="start"
+                  />
+                </Stack>
+                <Row className="mb-3">
+                  <Col>
+                    {isIsi ? (
+                      <FormControl fullWidth>
+                        <InputLabel id="id_produk">Produk</InputLabel>
+                        <Select
+                          disabled={!isFilling}
+                          labelId="id_produk"
+                          label="id_produk"
+                          value={dataDetailHampers.id_produk}
+                          name="id_produk"
+                          onChange={handleChangeDetailHampers}
+                        >
+                          {produk.map((produk) => (
+                            <MenuItem key={produk.id} value={produk.id}>
+                              {produk.nama + " " + produk.ukuran}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      <FormControl fullWidth>
+                        <InputLabel id="id_bahan_baku">Packaging</InputLabel>
+                        <Select
+                          disabled={!isFilling}
+                          labelId="id_bahan_baku"
+                          label="id_bahan_baku"
+                          value={dataDetailHampers.id_bahan_baku}
+                          name="id_bahan_baku"
+                          onChange={handleChangeDetailHampers}
+                        >
+                          {bahanBaku.map((bahan) => (
+                            <MenuItem key={bahan.id} value={bahan.id}>
+                              {bahan.nama}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
                   </Col>
                 </Row>
                 <Row>
                   <Col>
                     <TextField
                       fullWidth
-                      label="Rincian"
-                      name="rincian"
+                      label="Jumlah"
+                      name="jumlah"
                       variant="outlined"
                       color="primary"
-                      value={data.rincian}
+                      value={dataDetailHampers.jumlah}
                       disabled={!isFilling}
-                      onChange={handleChange}
+                      onChange={handleChangeDetailHampers}
+                      InputProps={{ inputComponent: NumberFormat }}
                     />
                   </Col>
                 </Row>
               </Col>
             </Row>
+            {(isFilling || selectedRow !== null) && (
+              <>
+                <Button
+                  disabled={
+                    dataDetailHampers.jumlah === "" ||
+                    isNaN(dataDetailHampers.jumlah) ||
+                    dataDetailHampers.jumlah === "0" ||
+                    dataDetailHampers.id_bahan_baku === "" ||
+                    dataDetailHampers.id_produk === "" ||
+                    !isFilling ||
+                    isPending
+                  }
+                  className="w-100 my-3"
+                  onClick={handleAddDetailHampers}
+                >
+                  Tambahkan Isi
+                </Button>
+                <Paper className="p-3">
+                  {detailHampers.length > 0 ? (
+                    detailHampers.map((item, index) => {
+                      let adata = null;
+                      if (item.id_produk !== null) {
+                        adata = produk.find((p) => p.id === item.id_produk);
+                      } else if (item.id_bahan_baku !== null) {
+                        adata = bahanBaku.find(
+                          (b) => b.id === item.id_bahan_baku
+                        );
+                      }
 
-            <Stack direction="horizontal" gap={3} className="mt-2">
+                      return (
+                        <Chip
+                          className="m-1"
+                          key={index}
+                          disabled={!isFilling || isPending}
+                          label={
+                            <span>
+                              <strong>
+                                {adata.nama}
+                                {item.id_produk !== null && adata.ukuran
+                                  ? " " + adata.ukuran
+                                  : ""}
+                              </strong>
+                              {" : " + item.jumlah}
+                            </span>
+                          }
+                          onClick={() => handleClickChip(item)}
+                          onDelete={() => handleDeleteChip(index)}
+                        />
+                      );
+                    })
+                  ) : (
+                    <Alert variant="danger" className="w-100 text-center">
+                      Tambahkan Isi Hampers
+                    </Alert>
+                  )}
+                </Paper>
+              </>
+            )}
+            <Stack direction="horizontal" className="mt-3" gap={3}>
               {isAddDisabled ? (
                 <Button
                   style={{ width: "100px" }}
                   className="flex-grow-1"
                   size="lg"
                   variant="success"
-                  onClick={submitData}
+                  onClick={() => {
+                    setIsSaveModal(true);
+                    setShowModal(true);
+                  }}
                   disabled={
-                    data.nama.trim() === "" ||
-                    data.rincian.trim() === "" ||
-                    (typeof data.harga === "string"
-                      ? data.harga.trim() === ""
-                      : data.harga === "") ||
-                    (typeof data.id_produk1 === "string"
-                      ? data.id_produk1.trim() === ""
-                      : data.id_produk1 === "") ||
-                    (typeof data.id_produk2 === "string"
-                      ? data.id_produk2.trim() === ""
-                      : data.id_produk2 === "")
+                    dataHampers.nama.trim() === "" ||
+                    (typeof dataHampers.harga === "string"
+                      ? dataHampers.harga.trim() === ""
+                      : dataHampers.harga === "") ||
+                    detailHampers.length < 1 ||
+                    isPending
                   }
                 >
                   {isPending ? (
@@ -435,7 +634,12 @@ const Hampers = () => {
                 size="lg"
                 variant="danger"
                 onClick={
-                  isFilling ? () => clearAll() : () => handleShowModal("Hapus")
+                  isFilling
+                    ? () => clearAll()
+                    : () => {
+                        setIsSaveModal(false);
+                        setShowModal(true);
+                      }
                 }
                 disabled={isDelDisabled}
               >
@@ -454,7 +658,7 @@ const Hampers = () => {
         ) : hampers?.length > 0 ? (
           <CustomTable
             tableHeader={tableHeader}
-            data={hampers}
+            data={hampers.map(({ detail_hampers, ...rest }) => rest)}
             handleRowClick={handleRowClick}
           />
         ) : (
@@ -474,7 +678,8 @@ const Hampers = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -483,7 +688,13 @@ const Hampers = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
+              >
                 {isPending ? (
                   <>
                     <Spinner
@@ -501,7 +712,7 @@ const Hampers = () => {
               </Button>
               <Button
                 variant="danger"
-                onClick={handleCloseModal}
+                onClick={() => setShowModal(false)}
                 disabled={isPending}
               >
                 Batal

@@ -28,9 +28,26 @@ export const GetCustomerById = async (id) => {
   }
 };
 
-export const UpdateCustomerProfilPic = async (values) => {
+export const UpdateCustomerProfilPic = async (values, id) => {
   try {
-    const response = await useAxios.put(`/customer/update/profil-pic/${values.id}`, values, {
+    const response = await useAxios.post(
+      `/customer/update/profil-pic/${id}`,
+      values,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const UpdateCustomer = async (values) => {
+  try {
+    const response = await useAxios.put(`/profile/${values.id}`, values, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,

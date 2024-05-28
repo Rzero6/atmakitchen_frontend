@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Button, Alert, Spinner, Form, Stack } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { SignIn } from "../../api/apiAdminAuth";
-import { GetAllRole } from "../../api/apiRole";
 import { TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
@@ -11,18 +9,28 @@ import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import { PhoneNumberFormat } from "../NumericFormat";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/en-gb";
+import { SignUp } from "../../api/apiUserAuth";
 
-const FormLogin = () => {
+const FormRegister = () => {
   const navigate = useNavigate();
-  const [failedAttempt, setFailedAttempt] = useState(false);
+  const [response, setResponse] = useState(null);
   const [isDisabled, setIsDisabled] = useState(true);
-  const [roles, setRoles] = useState([]);
   const [data, setData] = useState({
+    nama: "",
     email: "",
     password: "",
+    tanggal_lahir: dayjs().subtract(18, "year").format("YYYY-MM-DD"),
+    no_telepon: "",
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -30,50 +38,31 @@ const FormLogin = () => {
   const handleChange = (event) => {
     const newData = { ...data, [event.target.name]: event.target.value };
     setData(newData);
-    if (newData.email.trim().length > 0 && newData.password.length > 0) {
+    if (
+      newData.email.trim().length > 0 &&
+      newData.password.length > 7 &&
+      newData.no_telepon.length > 8
+    ) {
       setIsDisabled(false);
     } else {
       setIsDisabled(true);
     }
   };
-  const fetchRoles = () => {
-    GetAllRole()
-      .then((response) => {
-        setRoles(response);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  useEffect(() => {
-    fetchRoles();
-  }, []);
   //Using Axios
-  const Login = (event) => {
+  const Register = (event) => {
     event.preventDefault();
     setLoading(true);
-    SignIn(data)
+    SignUp(data)
       .then((res) => {
-        const userRole = roles.find((role) => role.id === res.user.id_role);
-        sessionStorage.setItem("token", res.access_token);
-        sessionStorage.setItem("user", JSON.stringify(res.user));
-        sessionStorage.setItem("role", userRole.nama);
-        if (userRole.nama === "Customer") navigate("/");
-        else if (userRole.nama === "Owner") navigate("/owner");
-        else if (userRole.nama === "Manager Operasional") navigate("/mo");
-        else if (userRole.nama === "Admin") navigate("/admin");
-        else {
-          toast.error("unauthorized");
-          return;
-        }
         toast.success(res.message);
       })
       .catch((err) => {
         console.log(err);
-        setFailedAttempt(true);
-        toast.error(err.message);
+        if (err.message.email[0]) toast.error(err.message.email[0]);
+        else toast.error(err.message);
       })
-      .finally(() => {
+      .finally((res) => {
+        setResponse(res);
         setLoading(false);
       });
   };
@@ -83,17 +72,27 @@ const FormLogin = () => {
     <Form
       style={{ maxWidth: "800px", margin: "auto" }}
       className="p-4"
-      onSubmit={Login}
+      onSubmit={Register}
     >
       <Stack direction="vertical" gap={3}>
         <Alert variant="primary" className="mb-3 alertColor">
           <p className="mb-0 lead">
-            <strong>Atma Kitchen</strong> mantaaapss
+            <strong>Atma Kitchen</strong> registrasi
           </p>
           <p className="mb-0">
-            Selamat datang di website kami silahkan login...
+            Isi nama minimal 3 huruf dan password minimal 8 huruf{" "}
           </p>
         </Alert>
+        <TextField
+          label="Nama"
+          placeholder="Masukkan Nama"
+          variant="outlined"
+          color="primary"
+          name="nama"
+          type="text"
+          value={data.nama}
+          onChange={handleChange}
+        />
         <TextField
           label="Email"
           placeholder="Masukkan Email"
@@ -131,23 +130,34 @@ const FormLogin = () => {
             onChange={handleChange}
           />
         </FormControl>
-        {failedAttempt ? (
-          <Alert variant="danger" className="alertColor">
-            <p className="mb-0 lead">
-              <strong>Password atau Email Salah</strong>
-            </p>
-            <p className="m-0">
-              <Link to="/password/reset" style={{ color: "black" }}>
-                aduh lupa password
-              </Link>
-            </p>
-          </Alert>
-        ) : (
-          <div className="text-end">
-            <Link to="/password/reset">lupa password ?</Link>
-          </div>
-        )}
-
+        <TextField
+          label="No Telepon"
+          placeholder="Masukkan Nomor Telepon"
+          variant="outlined"
+          color="primary"
+          name="no_telepon"
+          type="text"
+          value={data.no_telepon}
+          onChange={handleChange}
+          InputProps={{ inputComponent: PhoneNumberFormat }}
+        />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+          <DatePicker
+            disableFuture
+            maxDate={dayjs().subtract(18, "year")}
+            label="Tanggal Lahir"
+            name="tanggal_lahir"
+            onChange={(newValue) => {
+              const formattedDate = newValue.format("YYYY-MM-DD");
+              setData({
+                ...data,
+                tanggal_lahir: formattedDate,
+              });
+            }}
+            value={dayjs(data.tanggal_lahir)}
+            className="w-100"
+          />
+        </LocalizationProvider>
         <Button
           type="submit"
           disabled={isDisabled || loading}
@@ -156,11 +166,17 @@ const FormLogin = () => {
           {loading ? (
             <Spinner animation="border" variant="light" size="sm" />
           ) : (
-            <span>Login</span>
+            <span>Register</span>
           )}
         </Button>
+
+        {response && response.status ? (
+          <Alert variant="success">{response.message}</Alert>
+        ) : response && response.message ? (
+          <Alert variant="danger">{response.message}</Alert>
+        ) : null}
       </Stack>
     </Form>
   );
 };
-export default FormLogin;
+export default FormRegister;

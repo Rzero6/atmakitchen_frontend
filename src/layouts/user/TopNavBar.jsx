@@ -1,15 +1,19 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import { Navbar, Container, Nav, Button, Image } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Navbar, Stack, Nav, Button, Image } from "react-bootstrap";
+import { useState, useEffect, useContext } from "react";
 import { Modal } from "react-bootstrap";
 import { GetCustomerById } from "../../api/apiCustomer";
-import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import { Menu, MenuItem, Divider, AppBar } from "@mui/material";
 import { getProfilPic } from "../../api";
+import Badge from "@mui/material/Badge";
+import { FaShoppingCart } from "react-icons/fa";
+import logo from "../../assets/UAJY-LOGOGRAM.png";
+import { GlobalStateContext } from "../../api/contextAPI";
 
 const TopNavbar = ({ routes }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const { cart, setCart } = useContext(GlobalStateContext);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -26,9 +30,11 @@ const TopNavbar = ({ routes }) => {
   const [customer, setCustomer] = useState([]);
   const [show, setShow] = useState(false);
   const logout = () => {
+    setCart([]);
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("customer");
+    sessionStorage.removeItem("cart");
     handleCloseModal();
     navigate("/");
   };
@@ -70,12 +76,7 @@ const TopNavbar = ({ routes }) => {
           tabIndex={0}
           className="ms-3"
         >
-          <Image
-            src="https://i.pinimg.com/originals/05/71/be/0571be92d64742ac3fec3230a723d0a8.jpg"
-            width={50}
-            height={50}
-            alt="Logo"
-          />{" "}
+          <Image className="p-1" src={logo} width={50} height={50} alt="Logo" />{" "}
           Atma Kitchen
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" className="me-3" />
@@ -91,7 +92,25 @@ const TopNavbar = ({ routes }) => {
           </Nav>
           <Nav className="me-3">
             {isLoggedIn ? (
-              <div>
+              <Stack
+                direction="horizontal"
+                gap={2}
+                className="d-flex justify-content-center align-items-center"
+              >
+                <Nav.Link>
+                  <Badge
+                    badgeContent={cart.length}
+                    color="secondary"
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        backgroundColor: "yellow",
+                        color: "black",
+                      },
+                    }}
+                  >
+                    <FaShoppingCart size={25} />
+                  </Badge>
+                </Nav.Link>
                 <Nav.Link onClick={handleClick}>
                   {customer.profil_pic ? (
                     <Avatar
@@ -103,7 +122,7 @@ const TopNavbar = ({ routes }) => {
                   )}
                 </Nav.Link>
                 <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                  <p className="text-center">
+                  <p className="text-center p-3">
                     Hello <strong>{user.nama}!</strong>
                   </p>
                   <Divider></Divider>
@@ -115,7 +134,7 @@ const TopNavbar = ({ routes }) => {
                   </MenuItem>
                   <MenuItem onClick={handleShowModal}>Logout</MenuItem>
                 </Menu>
-              </div>
+              </Stack>
             ) : (
               <Nav.Link onClick={login}>
                 <Button variant="success" className="w-100">

@@ -7,6 +7,14 @@ const SignIn = async (data) => {
     throw error.response.data;
   }
 };
+const SignUp = async (data) => {
+  try {
+    const response = await useAxios.post("/register", data);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
 const ResetPassword = async (data) => {
   try {
@@ -17,18 +25,22 @@ const ResetPassword = async (data) => {
   }
 };
 
-const UpdatePassword = async (data) => {
+const UpdatePassword = async (data, password) => {
   try {
-    const response = await useAxios.put(`/password/update/${data.id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-      },
-    });
+    const response = await useAxios.put(
+      `/password/update/${data.id}`,
+      password,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
 
-export { SignIn, ResetPassword, UpdatePassword };
+export { SignIn, ResetPassword, UpdatePassword, SignUp };

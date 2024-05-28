@@ -41,7 +41,8 @@ const CustomTable = ({
   const filteredRows = data.filter((row) =>
     Object.values(row).some(
       (value) =>
-        value &&
+        value !== null &&
+        value !== undefined &&
         value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );

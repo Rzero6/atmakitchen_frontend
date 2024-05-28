@@ -11,10 +11,12 @@ import {
   Stack,
   Spinner,
   Form,
+  Placeholder,
 } from "react-bootstrap";
 import Paper from "@mui/material/Paper";
 import {
   CreateProduk,
+  CreateProdukPenitip,
   DeleteProduk,
   GetAllProduk,
   UpdateProduk,
@@ -28,12 +30,16 @@ import {
   FormControlLabel,
   Switch,
   Avatar,
+  MenuItem,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
+import { getImageProduk } from "../../../api";
+import { GetAllPenitip } from "../../../api/apiPenitip";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama Produk", minWidth: 250 },
+  { id: "nama", label: "Nama Produk", minWidth: 100 },
+  { id: "penitip", label: "Penitip", minWidth: 50 },
   {
     id: "stok",
     label: "Stok",
@@ -46,7 +52,7 @@ export const tableHeader = [
     minWidth: 50,
     format: (value) => (value ? value.toLocaleString("id-ID") : "-"),
   },
-  { id: "jenis", label: "Jenis Produk", minWidth: 50 },
+  { id: "jenis", label: "Jenis", minWidth: 50 },
   { id: "ukuran", label: "Ukuran", minWidth: 50 },
   {
     id: "harga",
@@ -57,6 +63,8 @@ export const tableHeader = [
 ];
 
 const Produk = () => {
+  const imagePlaceHolder =
+    "https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg";
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
@@ -69,6 +77,9 @@ const Produk = () => {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [isTitipan, setIsTitipan] = useState(false);
+  const [penitip, setPenitip] = useState([]);
+  const [penitipMap, setPenitipMap] = useState([]);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     nama: "",
     stok: "",
@@ -76,6 +87,8 @@ const Produk = () => {
     limit_po: "",
     ukuran: "",
     jenis: "",
+    image: "",
+    id_penitip: "",
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -88,15 +101,35 @@ const Produk = () => {
   const handleRowClick = (row) => {
     clearAll();
     setSelectedRow(row);
+    setIsTitipan(row.id_penitip !== null);
     setIsEditDisabled(false);
     setIsDelDisabled(false);
     setData(row);
   };
+  const fetchPenitip = () => {
+    GetAllPenitip()
+      .then((response) => {
+        const penitipsMap = {};
+        setPenitip(response);
+        response.forEach((penitip) => {
+          penitipMap[penitip.id] = penitip.nama;
+        });
+        setPenitipMap(penitipsMap);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   const fetchProduk = () => {
     setIsLoading(true);
+    fetchPenitip();
     GetAllProduk()
       .then((response) => {
-        setProduk(response);
+        const produkWithPenitip = response.map((aproduk) => ({
+          ...aproduk,
+          penitip: aproduk.penitip ? penitipMap[aproduk.penitip.id] : "-",
+        }));
+        setProduk(produkWithPenitip);
       })
       .catch((err) => {
         console.log(err);
@@ -116,7 +149,11 @@ const Produk = () => {
       jenis: "",
       ukuran: "",
       limit_po: "",
+      id_penitip: "",
+      image: "",
     });
+    setIsTitipan(false);
+    setThumbnail(null);
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -142,7 +179,6 @@ const Produk = () => {
     setIsPending(true);
     DeleteProduk(id)
       .then((response) => {
-        setIsPending(false);
         toast.success(response.message);
       })
       .catch((err) => {
@@ -154,12 +190,6 @@ const Produk = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -168,12 +198,15 @@ const Produk = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
       UpdateProduk(data)
         .then((response) => {
           toast.success(response.message);
+          clearAll();
+          fetchProduk();
         })
         .catch((err) => {
           console.log(err);
@@ -181,8 +214,6 @@ const Produk = () => {
         })
         .finally(() => {
           setIsPending(false);
-          clearAll();
-          fetchProduk();
         });
     } else {
       const formData = new FormData();
@@ -191,28 +222,45 @@ const Produk = () => {
       formData.append("stok", data.stok);
       formData.append("ukuran", data.ukuran);
       formData.append("jenis", data.jenis);
-      formData.append("limit_po", data.limit_po);
       formData.append("harga", data.harga);
       formData.append("image", thumbnail);
+      if (isTitipan) formData.append("id_penitip", data.id_penitip);
+      else formData.append("limit_po", data.limit_po);
 
-      CreateProduk(formData)
-        .then((response) => {
-          toast.success(response.message);
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error(JSON.stringify(err.message));
-        })
-        .finally(() => {
-          setIsPending(false);
-          clearAll();
-          fetchProduk();
-        });
+      isTitipan
+        ? CreateProdukPenitip(formData)
+            .then((response) => {
+              clearAll();
+              fetchProduk();
+              toast.success(response.message);
+            })
+            .catch((err) => {
+              console.log(err);
+              if (err.message.image[0]) toast.error("Masukan gambar!");
+              else toast.error(JSON.stringify(err.message));
+            })
+            .finally(() => {
+              setIsPending(false);
+            })
+        : CreateProduk(formData)
+            .then((response) => {
+              clearAll();
+              fetchProduk();
+              toast.success(response.message);
+            })
+            .catch((err) => {
+              console.log(err);
+              if (err.message.image[0]) toast.error("Masukan gambar!");
+              else toast.error(JSON.stringify(err.message));
+            })
+            .finally(() => {
+              setIsPending(false);
+            });
     }
   };
 
   return (
-    <Container className="p-3">
+    <Container>
       <Stack
         direction="horizontal"
         gap={3}
@@ -229,12 +277,18 @@ const Produk = () => {
         >
           <Form>
             <Row>
-              <Col>
+              <Col className="text-end">
                 <FormControlLabel
+                  disabled={!isFilling || selectedRow}
                   value={isTitipan}
-                  control={<Switch color="primary" />}
+                  control={
+                    <Switch
+                      color="primary"
+                      onChange={() => setIsTitipan(!isTitipan)}
+                      checked={isTitipan}
+                    />
+                  }
                   label={isTitipan ? "Titipan" : "Tidak Titipan"}
-                  onChange={() => setIsTitipan(!isTitipan)}
                   labelPlacement="start"
                 />
               </Col>
@@ -253,7 +307,11 @@ const Produk = () => {
                     />
                   ) : (
                     <img
-                      src="https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg"
+                      src={
+                        data.image
+                          ? getImageProduk(data.image)
+                          : imagePlaceHolder
+                      }
                       alt="Thumbnail"
                       className="w-100 h-100 object-fit-cover"
                     />
@@ -331,6 +389,7 @@ const Produk = () => {
                       value={data.harga}
                       disabled={!isFilling}
                       onChange={handleChange}
+                      InputProps={{ inputComponent: MoneyFormat }}
                     />
                   </Col>
                 </Row>
@@ -348,9 +407,8 @@ const Produk = () => {
                       InputProps={{ inputComponent: NumberFormat }}
                     />
                   </Col>
-
-                  {!isTitipan && (
-                    <Col>
+                  <Col>
+                    {!isTitipan ? (
                       <TextField
                         fullWidth
                         label="Limit PO"
@@ -362,22 +420,45 @@ const Produk = () => {
                         onChange={handleChange}
                         InputProps={{ inputComponent: NumberFormat }}
                       />
-                    </Col>
-                  )}
+                    ) : (
+                      <FormControl fullWidth>
+                        <InputLabel id="label-penitip">Penitip</InputLabel>
+                        <Select
+                          disabled={!isFilling}
+                          labelId="label-penitip"
+                          label="Penitip"
+                          value={data.id_penitip}
+                          name="id_penitip"
+                          onChange={handleChange}
+                        >
+                          {penitip.map(
+                            (penitip) =>
+                              penitip.nama !== "Customer" &&
+                              penitip.nama !== "Owner" && (
+                                <MenuItem key={penitip.id} value={penitip.id}>
+                                  {penitip.nama}
+                                </MenuItem>
+                              )
+                          )}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </Col>
                 </Row>
-                <Row></Row>
               </Col>
             </Row>
-            <Row></Row>
 
-            <Stack direction="horizontal" gap={3}>
+            <Stack className="mt-2" direction="horizontal" gap={3}>
               {isAddDisabled ? (
                 <Button
                   style={{ width: "100px" }}
                   className="flex-grow-1"
                   size="lg"
                   variant="success"
-                  onClick={submitData}
+                  onClick={() => {
+                    setIsSaveModal(true);
+                    setShowModal(true);
+                  }}
                   disabled={
                     data.nama.trim() === "" ||
                     (typeof data.stok === "string"
@@ -388,9 +469,12 @@ const Produk = () => {
                       ? data.harga.trim() === ""
                       : data.harga === "") ||
                     data.jenis.trim() === "" ||
-                    (typeof data.limit_po === "string"
+                    (isTitipan
+                      ? data.id_penitip === ""
+                      : typeof data.limit_po === "string"
                       ? data.limit_po.trim() === ""
-                      : data.limit_po === "")
+                      : data.limit_po === "") ||
+                    isPending
                   }
                 >
                   {isPending ? (
@@ -436,7 +520,12 @@ const Produk = () => {
                 size="lg"
                 variant="danger"
                 onClick={
-                  isFilling ? () => clearAll() : () => handleShowModal("Hapus")
+                  isFilling
+                    ? () => clearAll()
+                    : () => {
+                        setIsSaveModal(false);
+                        setShowModal(true);
+                      }
                 }
                 disabled={isDelDisabled}
               >
@@ -475,7 +564,8 @@ const Produk = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -484,7 +574,13 @@ const Produk = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
+              >
                 {isPending ? (
                   <>
                     <Spinner

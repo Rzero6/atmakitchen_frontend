@@ -46,7 +46,11 @@ export const tableHeader = [
     minWidth: 100,
     format: (value) => `Rp. ${value.toLocaleString("id-ID")}`,
   },
-  { id: "tglPembelian", label: "Tanggal Pembelian", minWidth: 100 },
+  {
+    id: "tanggal_pembelian_formatted",
+    label: "Tanggal Pembelian",
+    minWidth: 100,
+  },
 ];
 
 const PembelianBahanBaku = () => {
@@ -57,11 +61,11 @@ const PembelianBahanBaku = () => {
   const [bahanbaku, setBahanBaku] = useState([]);
   const [bahanBakuMap, setBahanBakuMap] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     id_bahanBaku: "",
     jumlah: "",
@@ -75,10 +79,13 @@ const PembelianBahanBaku = () => {
   const handleRowClick = (row) => {
     clearAll();
     setSelectedRow(row);
-    setIsEditDisabled(false);
-    setIsDelDisabled(false);
+    if (!dayjs(row.tglPembelian).isBefore(dayjs(), "day")) {
+      setIsEditDisabled(false);
+      setIsDelDisabled(false);
+    }
     setData(row);
   };
+
   const fetchPembelianBahanBaku = () => {
     setIsLoading(true);
     fetchBahanBaku();
@@ -87,6 +94,9 @@ const PembelianBahanBaku = () => {
         const pembelianWithNamaBB = response.map((pembelianBahanBaku) => ({
           ...pembelianBahanBaku,
           nama_bb: bahanBakuMap[pembelianBahanBaku.id_bahanBaku],
+          tanggal_pembelian_formatted: dayjs(
+            pembelianBahanBaku.tglPembelian
+          ).format("DD MMM YYYY"),
         }));
         setPembelianBahanBaku(pembelianWithNamaBB);
         setIsLoading(false);
@@ -160,12 +170,6 @@ const PembelianBahanBaku = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -174,7 +178,7 @@ const PembelianBahanBaku = () => {
 
   const submitData = (event) => {
     event.preventDefault();
-    console.log(data.tglPembelian);
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
@@ -305,7 +309,10 @@ const PembelianBahanBaku = () => {
                     className="flex-grow-1"
                     size="lg"
                     variant="success"
-                    onClick={submitData}
+                    onClick={() => {
+                      setIsSaveModal(true);
+                      setShowModal(true);
+                    }}
                     disabled={
                       (typeof data.jumlah === "string"
                         ? data.jumlah.trim() === ""
@@ -316,7 +323,8 @@ const PembelianBahanBaku = () => {
                       (typeof data.harga === "string"
                         ? data.harga.trim() === ""
                         : data.harga === "") ||
-                      data.tglPembelian.trim() === ""
+                      data.tglPembelian.trim() === "" ||
+                      isPending
                     }
                   >
                     {isPending ? (
@@ -364,7 +372,10 @@ const PembelianBahanBaku = () => {
                   onClick={
                     isFilling
                       ? () => clearAll()
-                      : () => handleShowModal("Hapus")
+                      : () => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }
                   }
                   disabled={isDelDisabled}
                 >
@@ -404,7 +415,8 @@ const PembelianBahanBaku = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -413,7 +425,13 @@ const PembelianBahanBaku = () => {
               gap={2}
               className="justify-content-end"
             >
-              <Button variant="primary" onClick={() => delData(selectedRow.id)}>
+              <Button
+                variant="primary"
+                disabled={isPending}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
+              >
                 {isPending ? (
                   <>
                     <Spinner
