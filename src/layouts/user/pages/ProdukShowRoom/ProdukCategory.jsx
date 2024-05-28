@@ -18,7 +18,7 @@ const ProdukCategory = ({
               setSearchQuery({ ...searchQuery, category: category.jenis })
             }
             style={{
-              height: "250px",
+              maxHeight: "250px",
               cursor: "pointer",
             }}
           >
@@ -41,7 +41,7 @@ const ProdukCategory = ({
                 }}
               />
             </div>
-            <Card.Body style={{ height: "0px" }} className="text-center">
+            <Card.Body style={{ maxHeight: "70px" }} className="text-center">
               {category.jenis}
             </Card.Body>
           </Card>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Col, Row, Card, Stack } from "react-bootstrap";
-import { getImageProduk } from "../../../../api";
+import { getImageHampers } from "../../../../api";
 
 const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
   const filteredHampers = hampers.filter((hamper) =>
@@ -26,7 +26,7 @@ const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
                 src={
                   hamper.image === null
                     ? imagePlaceHolder
-                    : getImageProduk(hamper.image)
+                    : getImageHampers(hamper.image)
                 }
                 style={{
                   objectFit: "cover",

@@ -3,12 +3,22 @@ import { Col, Row, Card, Button } from "react-bootstrap";
 import { getImageProduk } from "../../../../api";
 
 const ProdukAll = ({ produk, searchQuery, imagePlaceHolder, addToCart }) => {
-  const filteredProduk = produk.filter(
-    (produk) =>
-      produk.nama.toLowerCase().includes(searchQuery.query.toLowerCase()) ||
-      produk.ukuran.toLowerCase().includes(searchQuery.query.toLowerCase()) ||
-      produk.harga.toString().includes(searchQuery.query)
-  );
+  const queryCategory = searchQuery.category.toLowerCase();
+
+  const filteredProduk = produk.filter((produk) => {
+    const matchesName = produk.nama
+      .toLowerCase()
+      .includes(searchQuery.query.toLowerCase());
+    const matchesSize = produk.ukuran
+      .toLowerCase()
+      .includes(searchQuery.query.toLowerCase());
+    const matchesPrice = produk.harga.toString().includes(searchQuery.query);
+    const matchesCategory =
+      queryCategory === "all" || produk.jenis.toLowerCase() === queryCategory;
+
+    return (matchesName || matchesSize || matchesPrice) && matchesCategory;
+  });
+  
   return (
     <Row>
       {filteredProduk.map((produk, index) => (

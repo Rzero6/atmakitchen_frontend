@@ -172,7 +172,7 @@ const ShowAllProduk = () => {
                   {category.jenis}
                 </MenuItem>
               ))}
-              <MenuItem value="All">Semua</MenuItem>
+              <MenuItem value="all">Semua</MenuItem>
             </Select>
           </FormControl>
         )}
@@ -187,7 +187,7 @@ const ShowAllProduk = () => {
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
             />
-
+      
             <HampersAll
               hampers={hampers}
               searchQuery={searchQuery}
