@@ -79,6 +79,7 @@ const Produk = () => {
   const [isTitipan, setIsTitipan] = useState(false);
   const [penitip, setPenitip] = useState([]);
   const [penitipMap, setPenitipMap] = useState([]);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     nama: "",
     stok: "",
@@ -189,11 +190,6 @@ const Produk = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -202,6 +198,7 @@ const Produk = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
@@ -392,6 +389,7 @@ const Produk = () => {
                       value={data.harga}
                       disabled={!isFilling}
                       onChange={handleChange}
+                      InputProps={{ inputComponent: MoneyFormat }}
                     />
                   </Col>
                 </Row>
@@ -447,19 +445,20 @@ const Produk = () => {
                     )}
                   </Col>
                 </Row>
-                <Row></Row>
               </Col>
             </Row>
-            <Row></Row>
 
-            <Stack direction="horizontal" gap={3}>
+            <Stack className="mt-2" direction="horizontal" gap={3}>
               {isAddDisabled ? (
                 <Button
                   style={{ width: "100px" }}
                   className="flex-grow-1"
                   size="lg"
                   variant="success"
-                  onClick={submitData}
+                  onClick={() => {
+                    setIsSaveModal(true);
+                    setShowModal(true);
+                  }}
                   disabled={
                     data.nama.trim() === "" ||
                     (typeof data.stok === "string"
@@ -521,7 +520,12 @@ const Produk = () => {
                 size="lg"
                 variant="danger"
                 onClick={
-                  isFilling ? () => clearAll() : () => handleShowModal("Hapus")
+                  isFilling
+                    ? () => clearAll()
+                    : () => {
+                        setIsSaveModal(false);
+                        setShowModal(true);
+                      }
                 }
                 disabled={isDelDisabled}
               >
@@ -560,7 +564,8 @@ const Produk = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -571,8 +576,10 @@ const Produk = () => {
             >
               <Button
                 variant="primary"
-                onClick={() => delData(selectedRow.id)}
                 disabled={isPending}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
               >
                 {isPending ? (
                   <>

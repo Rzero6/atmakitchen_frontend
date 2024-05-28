@@ -25,10 +25,15 @@ import { UpdatePassword } from "../api/apiUserAuth";
 export const ChangePasswordPage = () => {
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
-  const [data, setData] = useState({ password: "", confPassword: "" });
+  const [data, setData] = useState({
+    password: "",
+    confPassword: "",
+    old_password: "",
+  });
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState({ status: null, message: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   const changePassword = (event) => {
     event.preventDefault();
@@ -36,7 +41,7 @@ export const ChangePasswordPage = () => {
     UpdatePassword(user, data)
       .then((res) => {
         setResponse(res);
-        setData({ password: "", confPassword: "" });
+        setData({ password: "", confPassword: "", old_password: "" });
         toast.success(res.message);
       })
       .catch((err) => {
@@ -48,18 +53,44 @@ export const ChangePasswordPage = () => {
         setLoading(false);
       });
   };
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
   };
   return (
     <Container style={{ height: "100vh", width: "100%" }}>
-      <div className="content">
-        <Card className="p-5">
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100%" }}
+      >
+        <Card style={{ width: "360px" }} className="p-5">
           <Form onSubmit={changePassword}>
             <Stack gap={3}>
+              <FormControl variant="outlined">
+                <InputLabel htmlFor="outlined-adornment-password0">
+                  Password Lama
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password0"
+                  placeholder="Masukkan Password Lama"
+                  name="old_password"
+                  type={showPassword1 ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword1((show) => !show)}
+                        edge="end"
+                      >
+                        {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password Lama"
+                  autoComplete="off"
+                  value={data.old_password}
+                  onChange={handleChange}
+                />
+              </FormControl>
               <FormControl variant="outlined">
                 <InputLabel htmlFor="outlined-adornment-password1">
                   Password
@@ -74,7 +105,6 @@ export const ChangePasswordPage = () => {
                       <IconButton
                         aria-label="toggle password visibility"
                         onClick={() => setShowPassword((show) => !show)}
-                        onMouseDown={handleMouseDownPassword}
                         edge="end"
                       >
                         {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
@@ -101,7 +131,6 @@ export const ChangePasswordPage = () => {
                       <IconButton
                         aria-label="toggle password visibility"
                         onClick={() => setShowPassword2((show) => !show)}
-                        onMouseDown={handleMouseDownPassword}
                         edge="end"
                       >
                         {showPassword2 ? <MdVisibilityOff /> : <MdVisibility />}
@@ -118,7 +147,8 @@ export const ChangePasswordPage = () => {
                 disabled={
                   data.password === "" ||
                   data.confPassword === "" ||
-                  data.password !== data.confPassword
+                  data.password !== data.confPassword ||
+                  loading
                 }
                 type="submit"
                 className="w-100 border-0 buttonSubmit btn-lg"

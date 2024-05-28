@@ -40,7 +40,10 @@ const RiwayatPesanan = () => {
     setIsPending(true);
     GetTransaksiByUserId(user.id)
       .then((response) => {
-        setTransaksi(response);
+        const filteredTransaksi = response.filter(
+          (transaksi) => transaksi.status === "selesai"
+        );
+        setTransaksi(filteredTransaksi);
       })
       .catch((err) => {
         console.log(err);
@@ -49,6 +52,27 @@ const RiwayatPesanan = () => {
         setIsPending(false);
       });
   };
+
+  const filteredTransaksi = transaksi.filter((atransaksi) => {
+    const queryTerms = searchQuery
+      .toLowerCase()
+      .split(" ")
+      .filter((term) => term.trim() !== "");
+    return queryTerms.every((queryTerm) => {
+      return atransaksi.detail.some((adetail) => {
+        const productName = adetail.produk
+          ? adetail.produk.nama.toLowerCase()
+          : "";
+        const hamperName = adetail.hampers
+          ? adetail.hampers.nama.toLowerCase()
+          : "";
+        return (
+          productName.includes(queryTerm) || hamperName.includes(queryTerm)
+        );
+      });
+    });
+  });
+
   useEffect(() => {
     fetchTransaksi();
   }, []);
@@ -73,10 +97,10 @@ const RiwayatPesanan = () => {
       {isPending ? (
         <Skeleton animation="wave" variant="rounded" height={200} />
       ) : transaksi?.length > 0 ? (
-        transaksi.map((atransaksi, index) => (
+        filteredTransaksi.map((atransaksi, index) => (
           <Card
             key={index}
-            className="p-4"
+            className="p-4 mb-4"
             style={{ width: "100%", height: "50%" }}
           >
             <p>

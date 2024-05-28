@@ -69,3 +69,17 @@ export const DeleteResep = async (id) => {
     throw error.response.data;
   }
 };
+
+export const DeleteResepPerProduk = async (idProduk) => {
+  try {
+    const response = await useAxios.delete(`/resep/produk/${idProduk}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

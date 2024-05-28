@@ -24,11 +24,11 @@ import { toast } from "react-toastify";
 import { PhoneNumberFormat } from "../../../components/NumericFormat";
 
 export const tableHeader = [
-  { id: "nama", label: "Nama", minWidth: 100 },
+  { id: "nama", label: "Nama", minWidth: 80 },
   {
     id: "no_telp",
     label: "Nomor Telepon",
-    minWidth: 100,
+    minWidth: 40,
     format: (value) => {
       let formattedValue = value.replace(/(.{4})/g, "$1-");
       if (formattedValue.endsWith("-")) {
@@ -37,6 +37,7 @@ export const tableHeader = [
       return formattedValue;
     },
   },
+  { id: "alamat", label: "Alamat", minWidth: 100 },
 ];
 
 const Penitip = () => {
@@ -45,14 +46,15 @@ const Penitip = () => {
   const [isFilling, setIsFilling] = useState(false);
   const [penitip, setPenitip] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     nama: "",
     no_telp: "",
+    alamat: "",
   });
   const handleChange = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
@@ -83,7 +85,7 @@ const Penitip = () => {
   }, []);
 
   const clearAll = () => {
-    setData({ nama: "", no_telp: "" });
+    setData({ nama: "", no_telp: "", alamat: "" });
     setSelectedRow(null);
     setIsAddDisabled(false);
     setIsDelDisabled(true);
@@ -135,6 +137,7 @@ const Penitip = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
@@ -155,6 +158,7 @@ const Penitip = () => {
       const formData = new FormData();
       formData.append("nama", data.nama);
       formData.append("no_telp", data.no_telp);
+      formData.append("alamat", data.no_telp);
       CreatePenitip(formData)
         .then((response) => {
           toast.success(response.message);
@@ -216,6 +220,20 @@ const Penitip = () => {
                   />
                 </Col>
               </Row>
+              <Row>
+                <Col>
+                  <TextField
+                    fullWidth
+                    label="Alamat"
+                    name="alamat"
+                    variant="outlined"
+                    color="primary"
+                    value={data.alamat}
+                    disabled={!isFilling}
+                    onChange={handleChange}
+                  />
+                </Col>
+              </Row>
               <Stack direction="horizontal" gap={3}>
                 {isAddDisabled ? (
                   <Button
@@ -223,7 +241,10 @@ const Penitip = () => {
                     className="flex-grow-1"
                     size="lg"
                     variant="success"
-                    onClick={submitData}
+                    onClick={() => {
+                      setIsSaveModal(true);
+                      setShowModal(true);
+                    }}
                     disabled={
                       data.nama.trim() === "" ||
                       data.no_telp.trim() === "" ||
@@ -275,7 +296,10 @@ const Penitip = () => {
                   onClick={
                     isFilling
                       ? () => clearAll()
-                      : () => handleShowModal("Hapus")
+                      : () => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }
                   }
                   disabled={isDelDisabled}
                 >
@@ -315,7 +339,8 @@ const Penitip = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -327,7 +352,9 @@ const Penitip = () => {
               <Button
                 variant="primary"
                 disabled={isPending}
-                onClick={() => delData(selectedRow.id)}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
               >
                 {isPending ? (
                   <>
