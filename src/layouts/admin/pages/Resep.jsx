@@ -14,7 +14,7 @@ import {
 import Paper from "@mui/material/Paper";
 import {
   CreateResep,
-  DeleteResep,
+  DeleteResepPerProduk,
   GetAllResep,
   UpdateResep,
 } from "../../../api/apiResep";
@@ -25,6 +25,8 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Chip,
+  InputAdornment,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { MoneyFormat, NumberFormat } from "../../../components/NumericFormat";
@@ -32,9 +34,9 @@ import { GetAllBahanBaku } from "../../../api/apiBahanBaku";
 import { GetAllProduk } from "../../../api/apiProduk";
 
 export const tableHeader = [
-  { id: "nama_produk", label: "Produk", minWidth: 100 },
-  { id: "nama_bb", label: "Bahan Baku", minWidth: 100 },
-  { id: "takaran_satuan", label: "Takaran", minWidth: 50 },
+  { id: "nama", label: "Produk", minWidth: 100 },
+  { id: "ukuran", label: "Ukuran", minWidth: 100 },
+  { id: "status", label: "Status", minWidth: 100 },
 ];
 
 const Resep = () => {
@@ -43,15 +45,13 @@ const Resep = () => {
   const [isFilling, setIsFilling] = useState(false);
   const [resep, setResep] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
-  const [isAddDisabled, setIsAddDisabled] = useState(false);
-  const [isEditDisabled, setIsEditDisabled] = useState(true);
-  const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [produk, setProduk] = useState([]);
   const [bahanBaku, setBahanBaku] = useState([]);
   const [produkMap, setProdukMap] = useState([]);
   const [bahanBakuMap, setBahanBakuMap] = useState([]);
+  const [isSaveModal, setIsSaveModal] = useState(true);
+  const [selectedProdukResep, setSelectedProdukResep] = useState([]);
 
   const [data, setData] = useState({
     id_produk: "",
@@ -64,24 +64,60 @@ const Resep = () => {
 
   const handleRowClick = (row) => {
     clearAll();
+    setIsFilling(true);
     setSelectedRow(row);
-    setIsEditDisabled(false);
-    setIsDelDisabled(false);
-    setData(row);
+    setSelectedProdukResep(resep.filter((resep) => resep.id_produk === row.id));
+    console.log(selectedProdukResep);
+    setData({ ...data, id_produk: row.id });
+  };
+
+  const handleClickChip = (item) => {
+    setData(item);
+  };
+  const handleDeleteChip = (targetIndex) => {
+    const newArrayResep = selectedProdukResep.filter(
+      (item, index) => index !== targetIndex
+    );
+    setSelectedProdukResep(newArrayResep);
+  };
+  //Fetch Resep
+  const fetchResep = () => {
+    GetAllResep()
+      .then((response) => {
+        setResep(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   //FETCH PRODUK
   const fetchProduk = () => {
+    setIsLoading(true);
     GetAllProduk()
       .then((response) => {
         const produksMap = {};
-        setProduk(response);
         response.forEach((produk) => {
           produkMap[produk.id] = produk.nama;
         });
+        const produkWithStatusResep = response.map((produk) => {
+          const count = resep.filter(
+            (resep) => resep.id_produk === produk.id
+          ).length;
+          const status =
+            count === 0 ? "Belum ada resep" : `Ada ${count} Bahan Baku`;
+          return {
+            ...produk,
+            status: status,
+          };
+        });
+        setProduk(produkWithStatusResep);
         setProdukMap(produksMap);
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
   //FETCH BAHANBAKU
@@ -99,79 +135,34 @@ const Resep = () => {
         console.log(err);
       });
   };
-  const fetchResep = () => {
-    setIsLoading(true);
-    fetchBahanBaku();
-    fetchProduk();
-    GetAllResep()
-      .then((response) => {
-        const resepWithNamaPB = response.map((resep) => ({
-          ...resep,
-          nama_produk: produkMap[resep.id_produk],
-          nama_bb: bahanBakuMap[resep.id_bahan_baku].nama,
-          takaran_satuan: `${resep.takaran} ${
-            bahanBakuMap[resep.id_bahan_baku].satuan
-          }`,
-        }));
-
-        setResep(resepWithNamaPB);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsLoading(false);
-      });
-  };
 
   useEffect(() => {
+    fetchBahanBaku();
     fetchResep();
+    fetchProduk();
   }, []);
 
   const clearAll = () => {
     setData({ id_produk: "", id_bahan_baku: "", takaran: "" });
     setSelectedRow(null);
-    setIsAddDisabled(false);
-    setIsDelDisabled(true);
-    setIsEditDisabled(true);
+    setSelectedProdukResep([]);
     setIsFilling(false);
   };
 
-  const addData = () => {
-    clearAll();
-    setIsDelDisabled(false);
-    setIsAddDisabled(true);
-    setIsFilling(true);
+  const addListResepData = () => {
+    const index = selectedProdukResep.findIndex(
+      (r) => r.id_bahan_baku === data.id_bahan_baku
+    );
+    if (index === -1) {
+      selectedProdukResep.push(data);
+    } else {
+      const updatedSelectedProdukResep = [...selectedProdukResep];
+      updatedSelectedProdukResep[index] = data;
+      setSelectedProdukResep(updatedSelectedProdukResep);
+    }
+    setData({ ...data, takaran: "" });
   };
 
-  const editData = () => {
-    setIsEditDisabled(true);
-    setIsDelDisabled(false);
-    setIsAddDisabled(true);
-    setIsFilling(true);
-  };
-
-  const delData = (id) => {
-    setIsPending(true);
-    DeleteResep(id)
-      .then((response) => {
-        setIsPending(false);
-        toast.success(response.message);
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.dark(err.message);
-      })
-      .finally(() => {
-        setIsPending(false);
-        handleCloseModal();
-      });
-  };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -180,42 +171,34 @@ const Resep = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
-    setIsDelDisabled(true);
-    if (selectedRow) {
-      UpdateResep(data)
-        .then((response) => {
-          toast.success(response.message);
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error(JSON.stringify(err.message));
-        })
-        .finally(() => {
-          setIsPending(false);
-          clearAll();
-          fetchResep();
-        });
-    } else {
-      const formData = new FormData();
-      formData.append("id_produk", data.id_produk);
-      formData.append("id_bahan_baku", data.id_bahan_baku);
-      formData.append("takaran", data.takaran);
+    DeleteResepPerProduk(data.id_produk).then(() => {
+      selectedProdukResep
+        .forEach((adata) => {
+          const formData = new FormData();
+          formData.append("id_produk", adata.id_produk);
+          formData.append("id_bahan_baku", adata.id_bahan_baku);
+          formData.append("takaran", adata.takaran);
 
-      CreateResep(formData)
-        .then((response) => {
-          toast.success(response.message);
+          CreateResep(formData)
+            .then((response) => {
+              toast.success(response.message);
+            })
+            .catch((err) => {
+              console.log(err);
+              toast.error(JSON.stringify(err.message));
+            })
+            .finally(() => {
+              setIsPending(false);
+              clearAll();
+            });
         })
         .catch((err) => {
           console.log(err);
           toast.error(JSON.stringify(err.message));
-        })
-        .finally(() => {
-          setIsPending(false);
-          clearAll();
-          fetchResep();
         });
-    }
+    });
   };
 
   return (
@@ -230,136 +213,6 @@ const Resep = () => {
       </Stack>
 
       <Row className="justify-content-center align-items-center">
-        <Paper
-          className="mb-3 p-3"
-          sx={{ width: "100vh", overflow: "hidden", overflowX: "auto" }}
-        >
-          <Form>
-            <Stack gap={3}>
-              <Row>
-                <Col>
-                  <FormControl fullWidth>
-                    <InputLabel id="id_produk">Produk</InputLabel>
-                    <Select
-                      disabled={!isFilling}
-                      labelId="id_produk"
-                      label="ID Produk"
-                      value={data.id_produk}
-                      name="id_produk"
-                      onChange={handleChange}
-                    >
-                      {produk.map((produk) => (
-                        <MenuItem key={produk.id} value={produk.id}>
-                          {produk.nama} {produk.ukuran}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Col>
-                <Col>
-                  <FormControl fullWidth>
-                    <InputLabel id="id_bahan_baku">Bahan Baku</InputLabel>
-                    <Select
-                      disabled={!isFilling}
-                      labelId="id_bahan_baku"
-                      label="ID Bahan Baku"
-                      value={data.id_bahan_baku}
-                      name="id_bahan_baku"
-                      onChange={handleChange}
-                    >
-                      {bahanBaku.map((bahanBaku) => (
-                        <MenuItem key={bahanBaku.id} value={bahanBaku.id}>
-                          {bahanBaku.nama}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <TextField
-                    fullWidth
-                    label="Takaran"
-                    name="takaran"
-                    variant="outlined"
-                    color="primary"
-                    value={data.takaran}
-                    disabled={!isFilling}
-                    onChange={handleChange}
-                  />
-                </Col>
-              </Row>
-              <Stack direction="horizontal" gap={3}>
-                {isAddDisabled ? (
-                  <Button
-                    style={{ width: "100px" }}
-                    className="flex-grow-1"
-                    size="lg"
-                    variant="success"
-                    onClick={submitData}
-                    disabled={
-                      data.id_produk === "" ||
-                      data.id_bahan_baku === "" ||
-                      data.takaran === "" ||
-                      isPending
-                    }
-                  >
-                    {isPending ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="grow"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                        />
-                        Loading...
-                      </>
-                    ) : (
-                      <span>Simpan</span>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    style={{ width: "100px" }}
-                    className="flex-grow-1"
-                    size="lg"
-                    variant="success"
-                    disabled={isLoading}
-                    onClick={() => addData()}
-                  >
-                    Tambah
-                  </Button>
-                )}
-                <Button
-                  style={{ width: "100px" }}
-                  className="flex-grow-1"
-                  size="lg"
-                  variant="warning"
-                  onClick={() => editData()}
-                  disabled={isEditDisabled}
-                >
-                  Ubah
-                </Button>
-                <Button
-                  style={{ width: "100px" }}
-                  className="flex-grow-1"
-                  size="lg"
-                  variant="danger"
-                  onClick={
-                    isFilling
-                      ? () => clearAll()
-                      : () => handleShowModal("Hapus")
-                  }
-                  disabled={isDelDisabled}
-                >
-                  {isFilling ? "Batal" : "Hapus"}
-                </Button>
-              </Stack>
-            </Stack>
-          </Form>
-        </Paper>
         {isLoading ? (
           <div
             className="d-flex align-items-center justify-content-center"
@@ -367,12 +220,179 @@ const Resep = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : resep?.length > 0 ? (
-          <CustomTable
-            tableHeader={tableHeader}
-            data={resep}
-            handleRowClick={handleRowClick}
-          />
+        ) : produk?.length > 0 ? (
+          <>
+            <CustomTable
+              tableHeader={tableHeader}
+              data={produk}
+              handleRowClick={handleRowClick}
+            />
+            {selectedRow && (
+              <Paper
+                className="mt-3 p-3"
+                sx={{ width: "100vh", overflow: "hidden", overflowX: "auto" }}
+              >
+                <Form>
+                  <Stack gap={3}>
+                    <Row>
+                      <Col>
+                        <FormControl fullWidth>
+                          <InputLabel id="id_produk">Produk</InputLabel>
+                          <Select
+                            disabled
+                            labelId="id_produk"
+                            label="ID Produk"
+                            value={data.id_produk}
+                            name="id_produk"
+                            onChange={handleChange}
+                          >
+                            {produk.map((produk) => (
+                              <MenuItem key={produk.id} value={produk.id}>
+                                {produk.nama} {produk.ukuran}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <FormControl fullWidth>
+                          <InputLabel id="id_bahan_baku">Bahan Baku</InputLabel>
+                          <Select
+                            disabled={!isFilling}
+                            labelId="id_bahan_baku"
+                            label="ID Bahan Baku"
+                            value={data.id_bahan_baku}
+                            name="id_bahan_baku"
+                            onChange={handleChange}
+                          >
+                            {bahanBaku.map((bahanBaku) => (
+                              <MenuItem key={bahanBaku.id} value={bahanBaku.id}>
+                                {bahanBaku.nama}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Col>
+                      <Col>
+                        <TextField
+                          fullWidth
+                          label="Takaran"
+                          name="takaran"
+                          variant="outlined"
+                          color="primary"
+                          value={data.takaran}
+                          disabled={!isFilling}
+                          onChange={handleChange}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                {data.id_bahan_baku
+                                  ? bahanBaku.find(
+                                      (item) => item.id === data.id_bahan_baku
+                                    ).satuan
+                                  : ""}
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Col>
+                    </Row>
+
+                    <Stack direction="horizontal" gap={3}>
+                      <Button
+                        style={{ width: "100px" }}
+                        className="flex-grow-1"
+                        size="lg"
+                        variant="primary"
+                        onClick={() => addListResepData()}
+                        disabled={
+                          data.id_produk === "" ||
+                          data.id_bahan_baku === "" ||
+                          data.takaran === "" ||
+                          isPending
+                        }
+                      >
+                        Tambah
+                      </Button>
+                      <Button
+                        style={{ width: "100px" }}
+                        className="flex-grow-1"
+                        size="lg"
+                        variant="success"
+                        onClick={() => {
+                          setIsSaveModal(true);
+                          setShowModal(true);
+                        }}
+                        disabled={
+                          !isFilling || selectedProdukResep.length === 0
+                        }
+                      >
+                        {isPending ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="grow"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                            />
+                            Loading...
+                          </>
+                        ) : (
+                          <span>Simpan</span>
+                        )}
+                      </Button>
+
+                      <Button
+                        style={{ width: "100px" }}
+                        className="flex-grow-1"
+                        size="lg"
+                        variant="danger"
+                        onClick={() => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }}
+                        disabled={!isFilling}
+                      >
+                        Batal
+                      </Button>
+                    </Stack>
+
+                    <Paper className="p-3" elevation={3} color="gray">
+                      {selectedProdukResep.length > 0 ? (
+                        selectedProdukResep.map((item, index) => {
+                          const bahan = bahanBaku.find(
+                            (b) => b.id === item.id_bahan_baku
+                          );
+                          return (
+                            <Chip
+                              className="m-1"
+                              key={index}
+                              label={
+                                <span>
+                                  <strong>{bahan.nama}</strong>
+                                  {" : " + item.takaran + " " + bahan.satuan}
+                                </span>
+                              }
+                              onClick={() => handleClickChip(item)}
+                              onDelete={() => handleDeleteChip(index)}
+                            />
+                          );
+                        })
+                      ) : (
+                        <Chip
+                          className="m-1"
+                          label="Belum ada resep, tambahkan sesuatu"
+                        />
+                      )}
+                    </Paper>
+                  </Stack>
+                </Form>
+              </Paper>
+            )}
+          </>
         ) : (
           <div
             className="d-flex align-items-center justify-content-center"
@@ -390,7 +410,8 @@ const Resep = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Batal"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -401,8 +422,8 @@ const Resep = () => {
             >
               <Button
                 variant="primary"
-                onClick={() => delData(selectedRow.id)}
                 disabled={isPending}
+                onClick={isSaveModal ? submitData : handleCloseModal}
               >
                 {isPending ? (
                   <>
@@ -421,7 +442,7 @@ const Resep = () => {
               </Button>
               <Button
                 variant="danger"
-                onClick={handleCloseModal}
+                onClick={() => setShowModal(false)}
                 disabled={isPending}
               >
                 Batal

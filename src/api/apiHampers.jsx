@@ -69,3 +69,30 @@ export const DeleteHampers = async (id) => {
     throw error.response.data;
   }
 };
+
+export const CreateDetailHampers = async (data) => {
+  try {
+    const response = await useAxios.post("/hampers/detail", data, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const DeleteAllDetailHampers = async (idHampers) => {
+  try {
+    const response = await useAxios.delete(`/hampers/${idHampers}/detail`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

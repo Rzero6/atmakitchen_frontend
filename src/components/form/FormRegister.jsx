@@ -51,7 +51,6 @@ const FormRegister = () => {
   //Using Axios
   const Register = (event) => {
     event.preventDefault();
-    console.log(data);
     setLoading(true);
     SignUp(data)
       .then((res) => {

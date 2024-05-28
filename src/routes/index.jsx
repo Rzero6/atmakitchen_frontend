@@ -25,6 +25,8 @@ import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 import Resep from "../layouts/admin/pages/Resep";
 import { ChangePasswordPage } from "../layouts/changePassword";
 import GajiDanBonus from "../layouts/owner/pages/GajiDanBonus";
+import ShowAllProduk from "../layouts/user/pages/ProdukShowRoom/ShowAllProduk";
+import { GlobalStateProvider } from "../api/contextAPI";
 
 const router = createBrowserRouter([
   {
@@ -36,7 +38,13 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <UserLayout />,
-        children: [{ path: "/", element: <Home /> }],
+        children: [
+          { path: "/", element: <Home /> },
+          {
+            path: "/produk",
+            element: <ShowAllProduk />,
+          },
+        ],
       },
       {
         children: [
@@ -115,7 +123,7 @@ const router = createBrowserRouter([
 ]);
 const AppRouter = () => {
   return (
-    <>
+    <GlobalStateProvider>
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -129,7 +137,7 @@ const AppRouter = () => {
         theme="light"
       />
       <RouterProvider router={router} />
-    </>
+    </GlobalStateProvider>
   );
 };
 export default AppRouter;

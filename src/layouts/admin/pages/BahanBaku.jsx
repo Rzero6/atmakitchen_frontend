@@ -40,12 +40,12 @@ const BahanBaku = () => {
   const [isFilling, setIsFilling] = useState(false);
   const [bahanBaku, setBahanBaku] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
   const [isPackaging, setIsPackaging] = useState(false);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     nama: "",
     stok: "",
@@ -120,12 +120,6 @@ const BahanBaku = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -134,6 +128,7 @@ const BahanBaku = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
@@ -261,7 +256,10 @@ const BahanBaku = () => {
                     className="flex-grow-1"
                     size="lg"
                     variant="success"
-                    onClick={submitData}
+                    onClick={() => {
+                      setIsSaveModal(true);
+                      setShowModal(true);
+                    }}
                     disabled={
                       data.nama.trim() === "" ||
                       (typeof data.stok === "string"
@@ -316,7 +314,10 @@ const BahanBaku = () => {
                   onClick={
                     isFilling
                       ? () => clearAll()
-                      : () => handleShowModal("Hapus")
+                      : () => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }
                   }
                   disabled={isDelDisabled}
                 >
@@ -356,7 +357,8 @@ const BahanBaku = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -368,7 +370,9 @@ const BahanBaku = () => {
               <Button
                 variant="primary"
                 disabled={isPending}
-                onClick={() => delData(selectedRow.id)}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
               >
                 {isPending ? (
                   <>
