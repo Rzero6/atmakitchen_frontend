@@ -1,10 +1,10 @@
 import { Alert, Button, Card, Col, Spinner, Stack } from "react-bootstrap";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { UpdateTransaksi } from "../../../api/apiTransaksi";
+import { UpdateTransaksi } from "../../../../api/apiTransaksi";
 import { toast } from "react-toastify";
 
-const KonfirmasiPesanan = ({ transaksi, fetchTransaksi, checkHargaKirim }) => {
+const SiapPickUp = ({ transaksi, fetchTransaksi }) => {
   const [isPending, setIsPending] = useState(false);
   const handleKonfirmasi = (konfirm, atransaksi) => {
     setIsPending(true);
@@ -86,30 +86,23 @@ const KonfirmasiPesanan = ({ transaksi, fetchTransaksi, checkHargaKirim }) => {
                 (Pengiriman)
               </span>
             )}
-            {atransaksi.tip > 0 && (
+            {atransaksi.tip !== 0 && (
               <span>+ Rp. {atransaksi.tip.toLocaleString("id-ID")} (Tip)</span>
             )}
           </p>
 
           {!isPending ? (
             <Stack
-              className="d-flex justify-content-end mt-2"
+              className="d-flex justify-content-end"
               direction="horizontal"
               gap={3}
             >
               <Button
-                variant="danger"
-                onClick={() => handleKonfirmasi("ditolak", atransaksi)}
-                disabled={isPending}
-              >
-                Tolak
-              </Button>
-              <Button
                 variant="success"
-                onClick={() => handleKonfirmasi("diterima", atransaksi)}
+                onClick={() => handleKonfirmasi("selesai", atransaksi)}
                 disabled={isPending}
               >
-                Terima
+                Sudah Di-pickup
               </Button>
             </Stack>
           ) : (
@@ -132,4 +125,4 @@ const KonfirmasiPesanan = ({ transaksi, fetchTransaksi, checkHargaKirim }) => {
   );
 };
 
-export default KonfirmasiPesanan;
+export default SiapPickUp;

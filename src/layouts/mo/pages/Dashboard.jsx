@@ -35,6 +35,20 @@ const DashboardMO = () => {
   const TabPanel = ({ children, value, index }) => {
     return value === index ? <Box sx={{ p: 3 }}>{children}</Box> : null;
   };
+  const checkHargaKirim = (jarak) => {
+    if (jarak <= 0) {
+      return 0;
+    }
+    if (jarak <= 5) {
+      return 10000;
+    } else if (jarak > 5 && jarak <= 10) {
+      return 15000;
+    } else if (jarak > 10 && jarak <= 15) {
+      return 20000;
+    } else {
+      return 25000;
+    }
+  };
   return (
     <Container className="p-3">
       <Stack
@@ -70,6 +84,7 @@ const DashboardMO = () => {
                 (transaksi) => transaksi.status === "pembayaran valid"
               )}
               fetchTransaksi={fetchTransaksi}
+              checkHargaKirim={checkHargaKirim}
             />
           </TabPanel>
           <TabPanel value={tab} index={1}>

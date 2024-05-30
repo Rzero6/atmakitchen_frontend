@@ -8,7 +8,6 @@ export const GetAllTransaksi = async () => {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     });
-    console.log(response.data);
     return response.data.data;
   } catch (error) {
     throw error.response.data;

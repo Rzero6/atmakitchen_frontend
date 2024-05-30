@@ -12,9 +12,9 @@ import logo from "../../../assets/UAJY-LOGOGRAM.png";
 import { LoremIpsum } from "react-lorem-ipsum";
 import { useState } from "react";
 import { Skeleton } from "@mui/material";
+import image from "../../../assets/pastry.jpg";
 
 const Home = () => {
-  const image = "https://picsum.photos/200";
   const [loading, setLoading] = useState(true);
 
   const handleImageLoad = () => {
@@ -92,8 +92,8 @@ const Home = () => {
               avgSentencesPerParagraph={8}
             />
           </Col>
-          <Col className="d-flex justify-content-end align-items-start">
-            <Card style={{ width: "70%" }}>
+          <Col md={6} className="d-flex justify-content-end align-items-start">
+            <Card>
               {loading && (
                 <Skeleton
                   variant="rectangular"
@@ -119,8 +119,8 @@ const Home = () => {
           style={{ maxWidth: "50%", margin: "0 auto" }}
         >
           <h3 className="text-end">Visi kami</h3>
-          <Col className="d-flex justify-content-start align-items-start">
-            <Card style={{ width: "70%" }}>
+          <Col md={6} className="d-flex justify-content-end align-items-start">
+            <Card>
               {loading && (
                 <Skeleton
                   variant="rectangular"

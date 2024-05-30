@@ -78,18 +78,7 @@ const PembayaranTransaksi = ({ transaksi, fetchTransaksi }) => {
               <p className="customP">
                 Total Pembayaran:
                 <strong>
-                  {" Rp. " +
-                    (
-                      transaksi.detail.reduce((total, adetail) => {
-                        const hargaProduk = adetail.produk
-                          ? adetail.produk.harga * adetail.jumlah
-                          : 0;
-                        const hargaHampers = adetail.hampers
-                          ? adetail.hampers.harga * adetail.jumlah
-                          : 0;
-                        return total + hargaProduk + hargaHampers;
-                      }, 0) + transaksi.tip
-                    ).toLocaleString("id-ID")}{" "}
+                  {" Rp. " + transaksi.total_harga.toLocaleString("id-ID")}{" "}
                 </strong>
               </p>
 

@@ -31,6 +31,20 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
   const [isPending, setIsPending] = useState(false);
   const [show, setShow] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const checkHargaKirim = (jarak) => {
+    if (jarak <= 0) {
+      return 0;
+    }
+    if (jarak <= 5) {
+      return 10000;
+    } else if (jarak > 5 && jarak <= 10) {
+      return 15000;
+    } else if (jarak > 10 && jarak <= 15) {
+      return 20000;
+    } else {
+      return 25000;
+    }
+  };
 
   const filteredTransaksi = transaksi.filter((atransaksi) => {
     const queryTerms = searchQuery
@@ -154,8 +168,9 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
             </p>
             <p className="customP">
               Total Pembayaran:{" Rp. "}
-              {(
-                atransaksi.detail.reduce((total, adetail) => {
+              {atransaksi.total_harga.toLocaleString("id-ID") + " = Rp. "}
+              {atransaksi.detail
+                .reduce((total, adetail) => {
                   const hargaProduk = adetail.produk
                     ? adetail.produk.harga * adetail.jumlah
                     : 0;
@@ -163,8 +178,15 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
                     ? adetail.hampers.harga * adetail.jumlah
                     : 0;
                   return total + hargaProduk + hargaHampers;
-                }, 0) + atransaksi.tip
-              ).toLocaleString("id-ID")}
+                }, 0)
+                .toLocaleString("id-ID")}{" "}
+              {atransaksi.id_alamat !== null && (
+                <span>
+                  + Rp.{" "}
+                  {checkHargaKirim(atransaksi.jarak).toLocaleString("id-ID")}{" "}
+                  (Pengiriman)
+                </span>
+              )}
             </p>
             {isPending ? (
               <div className="d-flex justify-content-end">
