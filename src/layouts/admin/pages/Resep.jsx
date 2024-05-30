@@ -36,7 +36,7 @@ import { GetAllProduk } from "../../../api/apiProduk";
 export const tableHeader = [
   { id: "nama", label: "Produk", minWidth: 100 },
   { id: "ukuran", label: "Ukuran", minWidth: 100 },
-  { id: "status", label: "Status", minWidth: 100 },
+  // { id: "status", label: "Status", minWidth: 100 },
 ];
 
 const Resep = () => {
@@ -67,7 +67,6 @@ const Resep = () => {
     setIsFilling(true);
     setSelectedRow(row);
     setSelectedProdukResep(resep.filter((resep) => resep.id_produk === row.id));
-    console.log(selectedProdukResep);
     setData({ ...data, id_produk: row.id });
   };
 
@@ -95,11 +94,14 @@ const Resep = () => {
     setIsLoading(true);
     GetAllProduk()
       .then((response) => {
+        const filteredProduks = response.filter(
+          (produk) => produk.id_penitip === null
+        );
         const produksMap = {};
         response.forEach((produk) => {
           produkMap[produk.id] = produk.nama;
         });
-        const produkWithStatusResep = response.map((produk) => {
+        const produkWithStatusResep = filteredProduks.map((produk) => {
           const count = resep.filter(
             (resep) => resep.id_produk === produk.id
           ).length;
@@ -173,9 +175,9 @@ const Resep = () => {
     event.preventDefault();
     setShowModal(false);
     setIsPending(true);
-    DeleteResepPerProduk(data.id_produk).then(() => {
-      selectedProdukResep
-        .forEach((adata) => {
+    DeleteResepPerProduk(data.id_produk)
+      .then(() => {
+        selectedProdukResep.forEach((adata) => {
           const formData = new FormData();
           formData.append("id_produk", adata.id_produk);
           formData.append("id_bahan_baku", adata.id_bahan_baku);
@@ -193,12 +195,17 @@ const Resep = () => {
               setIsPending(false);
               clearAll();
             });
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error(JSON.stringify(err.message));
         });
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(JSON.stringify(err.message));
+      })
+      .finally(() => {
+        fetchBahanBaku();
+        fetchResep();
+        fetchProduk();
+      });
   };
 
   return (

@@ -3,6 +3,9 @@ export const BASE_URL = "http://127.0.0.1:8000";
 export const getImageProduk = (thumbnail) => {
   return `${BASE_URL}/storage/produk/${thumbnail}`;
 };
+export const getBuktiBayar = (thumbnail) => {
+  return `${BASE_URL}/storage/bukti_bayar/${thumbnail}`;
+};
 export const getImageHampers = (thumbnail) => {
   return `${BASE_URL}/storage/hampers/${thumbnail}`;
 };

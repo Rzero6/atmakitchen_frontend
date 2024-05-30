@@ -3,7 +3,6 @@ import { ToastContainer } from "react-toastify";
 import Home from "../layouts/user/pages/Home";
 import UserLayout from "../layouts/user/UserLayout";
 import AdminLayout from "../layouts/admin/AdminLayout";
-import Dashboard from "../layouts/admin/pages/Dashboard";
 import Penitip from "../layouts/mo/pages/Penitip";
 import AdminProtectedRoutes from "./AdminProtectedRoutes";
 import MOProtectedRoutes from "./MOProtectedRoutes";
@@ -20,13 +19,16 @@ import Produk from "../layouts/admin/pages/Produk";
 import Hampers from "../layouts/admin/pages/Hampers";
 import CustomerProtectedRoutes from "./CustomerProtectedRoutes";
 import Profile from "../layouts/user/pages/Profile";
-import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
 import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 import Resep from "../layouts/admin/pages/Resep";
 import { ChangePasswordPage } from "../layouts/changePassword";
 import GajiDanBonus from "../layouts/owner/pages/GajiDanBonus";
 import ShowAllProduk from "../layouts/user/pages/ProdukShowRoom/ShowAllProduk";
 import { GlobalStateProvider } from "../api/contextAPI";
+import PesananTabs from "../layouts/user/pages/pesanan/Pesanan";
+import DashboardAdmin from "../layouts/admin/pages/Dashboard";
+import DashboardMO from "../layouts/mo/pages/Dashboard";
+import DashboardOwner from "../layouts/owner/pages/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -67,7 +69,7 @@ const router = createBrowserRouter([
         ),
         children: [
           { path: "/profile", element: <Profile /> },
-          { path: "/riwayat-pesanan", element: <RiwayatPesanan /> },
+          { path: "/pesanan", element: <PesananTabs /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
         ],
       },
@@ -79,7 +81,7 @@ const router = createBrowserRouter([
           </AdminProtectedRoutes>
         ),
         children: [
-          { path: "/admin", element: <Dashboard /> },
+          { path: "/admin", element: <DashboardAdmin /> },
           { path: "/admin/pelanggan", element: <Customer /> },
           { path: "/admin/bahanbaku", element: <BahanBaku /> },
           { path: "/admin/produk", element: <Produk /> },
@@ -96,7 +98,7 @@ const router = createBrowserRouter([
           </MOProtectedRoutes>
         ),
         children: [
-          { path: "/mo", element: <Dashboard /> },
+          { path: "/mo", element: <DashboardMO /> },
           // { path: "/mo/jabatan", element: <Customer /> },
           { path: "/mo/karyawan", element: <Karyawan /> },
           { path: "/mo/penitip", element: <Penitip /> },
@@ -113,7 +115,7 @@ const router = createBrowserRouter([
           </OwnerProtectedRoutes>
         ),
         children: [
-          { path: "/owner", element: <Dashboard /> },
+          { path: "/owner", element: <DashboardOwner /> },
           { path: "/owner/change-password", element: <ChangePasswordPage /> },
           { path: "/owner/gaji-bonus", element: <GajiDanBonus /> },
         ],
