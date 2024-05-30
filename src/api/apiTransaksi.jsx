@@ -8,6 +8,7 @@ export const GetAllTransaksi = async () => {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     });
+    console.log(response.data);
     return response.data.data;
   } catch (error) {
     throw error.response.data;
@@ -37,6 +38,33 @@ export const GetTransaksiByUserId = async (id) => {
       },
     });
     return response.data.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const UpdateTransaksi = async (values) => {
+  try {
+    const response = await useAxios.put(`/transaksi/${values.id}`, values, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const UploadBuktiBayarTransaksi = async (values, id) => {
+  try {
+    const response = await useAxios.post(`/transaksi/${id}`, values, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
   } catch (error) {
     throw error.response.data;
   }

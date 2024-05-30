@@ -129,8 +129,8 @@ const TopNavbar = ({ routes }) => {
                   <MenuItem onClick={() => navigate("/profile")}>
                     Profil
                   </MenuItem>
-                  <MenuItem onClick={() => navigate("/riwayat-pesanan")}>
-                    Riwayat Pesanan
+                  <MenuItem onClick={() => navigate("/pesanan")}>
+                    Pesanan
                   </MenuItem>
                   <MenuItem onClick={handleShowModal}>Logout</MenuItem>
                 </Menu>

@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { Container,Stack,Spinner,Alert } from "react-bootstrap";
 
-const DashboardAdmin = () => {
+const DashboardOwner = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
@@ -36,4 +36,4 @@ const DashboardAdmin = () => {
   );
 };
 
-export default DashboardAdmin;
+export default DashboardOwner;
