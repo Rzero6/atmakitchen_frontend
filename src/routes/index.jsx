@@ -29,6 +29,8 @@ import PesananTabs from "../layouts/user/pages/pesanan/Pesanan";
 import DashboardAdmin from "../layouts/admin/pages/Dashboard";
 import DashboardMO from "../layouts/mo/pages/Dashboard";
 import DashboardOwner from "../layouts/owner/pages/Dashboard";
+import Cart from "../layouts/user/pages/pesanan/Cart";
+
 
 const router = createBrowserRouter([
   {
@@ -45,6 +47,10 @@ const router = createBrowserRouter([
           {
             path: "/produk",
             element: <ShowAllProduk />,
+          },
+          {
+            path: "/cart",
+            element: <Cart />,
           },
         ],
       },

@@ -25,22 +25,29 @@ const ShowAllProduk = () => {
   const imagePlaceHolder =
     "https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg";
   const { cart, setCart } = useContext(GlobalStateContext);
-  const addToCart = (newItem) => {
+  const addToCart = (produk, hampers, jumlah) => {
     setCart((prevCart) => {
-      //ngecek
+      // Cek apakah item sudah ada di keranjang
+      const data = {
+        id: produk === null ? hampers.id : produk.id,
+        produk: produk,
+        hampers: hampers,
+        jumlah: jumlah,
+      };
       const existingItemIndex = prevCart.findIndex(
-        (item) => item.id === newItem.id
+        (item) => item.id === data.id
       );
 
       if (existingItemIndex !== -1) {
-        //nimpa
+        // Jika item sudah ada, tambahkan jumlah
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex] = newItem;
+        updatedCart[existingItemIndex].jumlah = jumlah;
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         return updatedCart;
       } else {
-        //buat baru
-        const updatedCart = [...prevCart, newItem];
+        // Jika item belum ada, tambahkan sebagai item baru dengan jumlah
+
+        const updatedCart = [...prevCart, data];
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         return updatedCart;
       }
@@ -187,7 +194,7 @@ const ShowAllProduk = () => {
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
             />
-      
+
             <HampersAll
               hampers={hampers}
               searchQuery={searchQuery}
