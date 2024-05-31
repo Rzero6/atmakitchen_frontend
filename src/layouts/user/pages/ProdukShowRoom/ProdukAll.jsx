@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row, Card, Button, Modal, Form } from "react-bootstrap";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -7,16 +7,45 @@ import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 
 import { getImageProduk } from "../../../../api";
+import { GetAllTransaksi } from "../../../../api/apiTransaksi";
 
-const ProdukAll = ({ produk, searchQuery, imagePlaceHolder, addToCart }) => {
+const ProdukAll = ({
+  produk,
+  searchQuery,
+  imagePlaceHolder,
+  addToCart,
+  user,
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedProduk, setSelectedProduk] = useState(null);
   const [jumlah, setJumlah] = useState("1");
   const [selectedDate, setSelectedDate] = useState(dayjs().add(3, "day")); // State for selected date
   const [error, setError] = useState("");
-
   const queryCategory = searchQuery.category.toLowerCase();
+  const [transaksi, setTransaksi] = useState([]);
+  const fetchTransaksi = () => {
+    GetAllTransaksi()
+      .then((res) => setTransaksi(res))
+      .catch((err) => console.log(err));
+  };
+  useEffect(() => {
+    fetchTransaksi();
+  }, []);
+  const countLimit = () => {
+    const desiredTransaksi = transaksi.filter((trx) =>
+      dayjs(trx.tanggal_penerimaan).isSame(dayjs(selectedDate))
+    );
+    let totalJumlah = 0;
+    desiredTransaksi.forEach((trx) => {
+      trx.detail.forEach((adetail) => {
+        if (adetail.id_produk === produk.id) {
+          totalJumlah += adetail.jumlah;
+        }
+      });
+    });
 
+    return totalJumlah;
+  };
   const filteredProduk = produk.filter((produk) => {
     const matchesName = produk.nama
       .toLowerCase()
@@ -63,8 +92,8 @@ const ProdukAll = ({ produk, searchQuery, imagePlaceHolder, addToCart }) => {
         {filteredProduk.map((produk, index) => (
           <Col md={3} className="p-3" key={index}>
             <Card
-              onClick={() => handleShowModal(produk)}
-              style={{ cursor: "pointer" }}
+              onClick={user !== null ? () => handleShowModal(produk) : () => {}}
+              style={{ cursor: user !== null && "pointer" }}
             >
               <Card.Img
                 className="border-bottom border-3"
@@ -134,12 +163,13 @@ const ProdukAll = ({ produk, searchQuery, imagePlaceHolder, addToCart }) => {
                   <span style={{ fontStyle: "italic" }}>Pre-order</span>
                   <div className="mb-3">
                     <strong>
-                      Limit PO Tersisa: {selectedProduk.limit_po}{" "}
+                      Limit PO Tersisa: {selectedProduk.limit_po - countLimit()}{" "}
                     </strong>
                   </div>
                   <div className="mb-3">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
+                        minDate={dayjs().add(3, "day")}
                         label="Tanggal Pembelian"
                         name="tglPembelian"
                         onChange={(newValue) => setSelectedDate(newValue)}
@@ -177,6 +207,7 @@ const ProdukAll = ({ produk, searchQuery, imagePlaceHolder, addToCart }) => {
             </Button>
             <Button
               variant="primary"
+              disabled={selectedProduk.limit_po - countLimit() <= 0}
               onClick={() => handleAdtoCart(selectedProduk, jumlah)}
             >
               Add to Cart

@@ -20,6 +20,13 @@ import {
 } from "../../../../api/apiTransaksi";
 import { toast } from "react-toastify";
 import { GetAllAlamat } from "../../../../api/apiAlamat";
+import dayjs from "dayjs";
+import {
+  DatePicker,
+  DateTimePicker,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const Cart = () => {
   const { cart, setCart } = useContext(GlobalStateContext);
@@ -27,7 +34,7 @@ const Cart = () => {
   const [alamat, setAlamat] = useState([]);
   const [transaksi, setTransaksi] = useState({
     id_alamat: "",
-    tanggal_penerimaan: "",
+    tanggal_penerimaan: dayjs().add(3, "day").format("YYYY-MM-DD HH:mm:ss"),
   });
   const [customer, setCustomer] = useState(
     JSON.parse(sessionStorage.getItem("customer"))
@@ -67,14 +74,17 @@ const Cart = () => {
     setIsPending(true);
     const formData = new FormData();
     formData.append("id_customer", customer.id);
-
     isDelivery && formData.append("id_alamat", transaksi.id_alamat);
-    formData.append("tanggal_pesanan", transaksi.tanggal_penerimaan);
-
+    formData.append(
+      "tanggal_penerimaan",
+      dayjs(transaksi.tanggal_penerimaan).format("YYYY-MM-DD HH:mm:ss")
+    );
     CreateTransaksi(formData)
       .then((res) => {
-        const idTransaksi = res.data.data.id;
+        const idTransaksi = res.data.id;
+        let count = 0;
         cart.forEach((element) => {
+          count++;
           const formDetail = new FormData();
           formDetail.append("id_transaksi", idTransaksi);
           element.produk === null
@@ -83,14 +93,18 @@ const Cart = () => {
           formDetail.append("jumlah", element.jumlah);
 
           CreateDetailTransaksi(formDetail)
-            .then(() => {})
+            .then(() => {
+              if (cart.length === count) {
+                toast.success("Berhasil");
+                setIsPending(false);
+                setCart([]);
+              }
+            })
             .catch((err) => {
               console.log(err);
               toast.error(err.message);
             });
         });
-        toast.success("Berhasil");
-        setIsPending(false);
       })
       .catch((err) => {
         toast.error(err.message);
@@ -104,18 +118,6 @@ const Cart = () => {
 
   const handleDeliveryOptionChange = (e) => {
     setDeliveryOption(e.target.value);
-  };
-
-  const handleModalSubmit = () => {
-    if (deliveryOption === "pickup") {
-      // Handle pickup
-      setShowModal(false);
-      // Redirect to payment or perform the necessary action
-    } else if (deliveryOption === "delivery") {
-      // Handle delivery
-      setShowModal(false);
-      // Show address input and then proceed to payment
-    }
   };
 
   const handleDeleteClick = (index) => {
@@ -275,7 +277,12 @@ const Cart = () => {
       </Row>
 
       {/* Order Modal */}
-      <Modal size="md" show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        size="md"
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Buat Pesanan</Modal.Title>
         </Modal.Header>
@@ -318,6 +325,23 @@ const Cart = () => {
                 </select>
               )}
             </div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateTimePicker
+                ampm={false}
+                minDate={dayjs().add(3, "day")}
+                label="Tanggal Menerima"
+                name="tanggal_penerimaan"
+                onChange={(newValue) => {
+                  const formattedDate = newValue.format("YYYY-MM-DD HH:mm:ss");
+                  setTransaksi({
+                    ...transaksi,
+                    tanggal_penerimaan: formattedDate,
+                  });
+                }}
+                value={dayjs(transaksi.tanggal_penerimaan)}
+                className="w-100"
+              />
+            </LocalizationProvider>
 
             {/* Menampilkan Rincian Pesanan */}
             <div>

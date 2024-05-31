@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row, Card, Stack, Modal, Button, Form } from "react-bootstrap";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -6,13 +6,47 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 import { getImageHampers } from "../../../../api";
+import { GetAllTransaksi } from "../../../../api/apiTransaksi";
 
-const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
+const HampersAll = ({
+  hampers,
+  searchQuery,
+  imagePlaceHolder,
+  addToCart,
+  user,
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedHamper, setSelectedHamper] = useState(null);
   const [jumlah, setJumlah] = useState("1");
   const [selectedDate, setSelectedDate] = useState(dayjs().add(3, "day"));
   const [error, setError] = useState("");
+  const [transaksi, setTransaksi] = useState([]);
+  const fetchTransaksi = () => {
+    GetAllTransaksi()
+      .then((res) => setTransaksi(res))
+      .catch((err) => console.log(err));
+  };
+  useEffect(() => {
+    fetchTransaksi();
+  }, []);
+  const countLimit = () => {
+    const desiredTransaksi = transaksi.filter((trx) =>
+      dayjs(trx.tanggal_penerimaan).isSame(dayjs(selectedDate))
+    );
+    let limit = 10;
+    desiredTransaksi.forEach((trx) => {
+      trx.detail.forEach((adetail) => {
+        if (adetail.id_produk !== null) {
+          const produk = adetail.produk;
+          if (produk && typeof produk.limit_po === "number") {
+            limit = Math.min(limit, produk.limit_po - trx.detail.length);
+          }
+        }
+      });
+    });
+
+    return limit;
+  };
 
   const handleShowModal = (hamper) => {
     setSelectedHamper(hamper);
@@ -70,8 +104,10 @@ const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
           {filteredHampers.map((hamper, index) => (
             <Col md={3} className="p-3" key={index}>
               <Card
-                onClick={() => handleShowModal(hamper)}
-                style={{ cursor: "pointer" }}
+                onClick={
+                  user !== null ? () => handleShowModal(hamper) : () => {}
+                }
+                style={{ cursor: user !== null && "pointer" }}
               >
                 <Card.Img
                   className="border-bottom border-3"
@@ -132,13 +168,12 @@ const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
             <div className="mb-0">
               <span style={{ fontStyle: "italic" }}>Pre-order</span>
               <div className="mb-3">
-                <strong>
-                  Limit PO Tersisa: {selectedHamper.limitPreorder}{" "}
-                </strong>
+                <strong>Limit PO Tersisa: {countLimit()} </strong>
               </div>
               <div className="mb-3">
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
+                    minDate={dayjs().add(3, "day")}
                     label="Tanggal Pembelian"
                     name="tglPembelian"
                     onChange={(newValue) => setSelectedDate(newValue)}
@@ -167,7 +202,11 @@ const HampersAll = ({ hampers, searchQuery, imagePlaceHolder, addToCart }) => {
             <Button variant="secondary" onClick={handleCloseModal}>
               Close
             </Button>
-            <Button variant="primary" onClick={() => handleAdtoCart(selectedHamper, jumlah)}>
+            <Button
+              variant="primary"
+              disabled={countLimit() <= 0}
+              onClick={() => handleAdtoCart(selectedHamper, jumlah)}
+            >
               Add to Cart
             </Button>
           </Modal.Footer>

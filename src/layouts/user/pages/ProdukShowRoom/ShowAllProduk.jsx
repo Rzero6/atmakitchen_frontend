@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect, useContext } from "react";
-import { Container, Stack } from "react-bootstrap";
+import { Container, Stack, Alert } from "react-bootstrap";
 import {
   FormControl,
   InputLabel,
@@ -22,6 +22,7 @@ import { GlobalStateContext } from "../../../../api/contextAPI";
 import "./text.css";
 
 const ShowAllProduk = () => {
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("user")));
   const imagePlaceHolder =
     "https://camarasal.com/wp-content/uploads/2020/08/default-image-5-1.jpg";
   const { cart, setCart } = useContext(GlobalStateContext);
@@ -132,6 +133,7 @@ const ShowAllProduk = () => {
 
   return (
     <Container className="py-3">
+      {user === null && <Alert variant="primary">Login untuk memesan</Alert>}
       <Stack gap={3}>
         <FormControl fullWidth variant="outlined">
           <InputLabel htmlFor="outlined-adornment-search">
@@ -193,6 +195,7 @@ const ShowAllProduk = () => {
               searchQuery={searchQuery}
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
+              user={user}
             />
 
             <HampersAll
@@ -200,6 +203,7 @@ const ShowAllProduk = () => {
               searchQuery={searchQuery}
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
+              user={user}
             />
           </>
         ) : searchQuery.category !== "" ? (
@@ -210,6 +214,7 @@ const ShowAllProduk = () => {
                 searchQuery={searchQuery}
                 imagePlaceHolder={imagePlaceHolder}
                 addToCart={addToCart}
+                user={user}
               />
 
               <HampersAll
@@ -217,6 +222,7 @@ const ShowAllProduk = () => {
                 searchQuery={searchQuery}
                 imagePlaceHolder={imagePlaceHolder}
                 addToCart={addToCart}
+                user={user}
               />
             </>
           ) : searchQuery.category === "Hampers" ? (
@@ -225,6 +231,7 @@ const ShowAllProduk = () => {
               searchQuery={searchQuery}
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
+              user={user}
             />
           ) : (
             <ProdukAll
@@ -232,6 +239,7 @@ const ShowAllProduk = () => {
               searchQuery={searchQuery}
               imagePlaceHolder={imagePlaceHolder}
               addToCart={addToCart}
+              user={user}
             />
           )
         ) : (
