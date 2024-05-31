@@ -97,7 +97,7 @@ const TopNavbar = ({ routes }) => {
                 gap={2}
                 className="d-flex justify-content-center align-items-center"
               >
-                <Nav.Link>
+                <Nav.Link onClick={() => navigate("/cart")}>
                   <Badge
                     badgeContent={cart.length}
                     color="secondary"
