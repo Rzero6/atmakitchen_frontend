@@ -77,9 +77,15 @@ const CheckJarak = ({ transaksi, fetchTransaksi }) => {
           {atransaksi.id_alamat === null ? (
             <p className="customP">Pick-up</p>
           ) : (
-            <p className="customP">
-              Alamat : {atransaksi.alamat.jalan}, {atransaksi.alamat.kota}
-            </p>
+            <>
+              <p className="customP">
+                Penerima : {atransaksi.alamat.nama_penerima}{" "}
+                {"(" + atransaksi.alamat.no_telepon + ")"}
+              </p>
+              <p className="customP">
+                Alamat : {atransaksi.alamat.jalan}, {atransaksi.alamat.kota}
+              </p>
+            </>
           )}
           <p className="customP">
             Barang yang dibeli:{" "}
