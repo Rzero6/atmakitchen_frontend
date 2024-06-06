@@ -42,13 +42,20 @@ export const LoginPage = () => {
               </h1>
             </div>
             {showLogin ? <FormLogin /> : <FormRegister />}
-            <Stack className="px-4 ">
+            <Stack className="px-4 " gap={3}>
               <Button
                 variant="success"
                 className="btn btn-lg"
                 onClick={() => setShowLogin(!showLogin)}
               >
                 {showLogin ? "Register" : "Login"}
+              </Button>
+              <Button
+                variant="secondary"
+                className="btn btn-lg"
+                onClick={() => navigate("/")}
+              >
+                Guest
               </Button>
             </Stack>
           </Card>

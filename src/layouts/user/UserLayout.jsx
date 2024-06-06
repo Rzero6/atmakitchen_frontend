@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 // import component
 import TopNavbar from "../user/TopNavBar";
+import { useState } from "react";
 //mengatur route yang akan ditampilkan di navbar
 const routes = [
   {
@@ -11,15 +12,15 @@ const routes = [
     path: "/produk",
     name: "Produk",
   },
-  {
-    path: "/tentang",
-    name: "Tentang",
-  },
 ];
 const UserLayout = ({ children }) => {
+  const [cart, setCart] = useState([]);
+  const addToCart = (item) => {
+    setCart((prevCart) => [...prevCart, item]);
+  };
   return (
     <div className="mt-4 pt-5">
-      <TopNavbar routes={routes} />
+      <TopNavbar routes={routes} cart={cart} addToCart={addToCart} />
       {children ? children : <Outlet />}
     </div>
   );

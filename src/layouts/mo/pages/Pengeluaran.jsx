@@ -45,11 +45,11 @@ const PengeluaranLain = () => {
   const [isFilling, setIsFilling] = useState(false);
   const [pengeluaranLain, setPengeluaranLain] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     rincian: "",
     nominal: "",
@@ -132,12 +132,6 @@ const PengeluaranLain = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -146,9 +140,13 @@ const PengeluaranLain = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
+      data.tanggal_pengeluaran = dayjs(data.tanggal_pengeluaran).format(
+        "YYYY-MM-DD"
+      );
       UpdatePengeluaranLain(data)
         .then((response) => {
           toast.success(response.message);
@@ -190,16 +188,15 @@ const PengeluaranLain = () => {
         gap={3}
         className="mb-3 justify-content-center"
       >
-        <h1 className="h4 fw-bold mb-0 text-nowrap">PengeluaranLain</h1>
+        <h1 className="h4 fw-bold mb-0 text-nowrap">Pengeluaran Lain</h1>
         <hr className="border-top border-dark border-3 opacity-100 w-50" />
       </Stack>
-
-      <Row className="justify-content-center align-items-center">
-        <Paper
-          className="mb-3 p-3"
-          sx={{ width: "100vh", overflow: "hidden", overflowX: "auto" }}
-        >
-          <Form>
+      <Form>
+        <Row className="justify-content-center align-items-center">
+          <Paper
+            className="mb-3 p-3"
+            sx={{ width: "100vh", overflow: "hidden", overflowX: "auto" }}
+          >
             <Stack gap={3}>
               <Row>
                 <Col>
@@ -258,7 +255,10 @@ const PengeluaranLain = () => {
                     className="flex-grow-1"
                     size="lg"
                     variant="success"
-                    onClick={submitData}
+                    onClick={() => {
+                      setIsSaveModal(true);
+                      setShowModal(true);
+                    }}
                     disabled={
                       data.rincian.trim() === "" ||
                       (typeof data.nominal === "string"
@@ -313,7 +313,10 @@ const PengeluaranLain = () => {
                   onClick={
                     isFilling
                       ? () => clearAll()
-                      : () => handleShowModal("Hapus")
+                      : () => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }
                   }
                   disabled={isDelDisabled}
                 >
@@ -321,78 +324,81 @@ const PengeluaranLain = () => {
                 </Button>
               </Stack>
             </Stack>
-          </Form>
-        </Paper>
-        {isLoading ? (
-          <div
-            className="d-flex align-items-center justify-content-center"
-            style={{ height: "50vh" }}
-          >
-            <Spinner animation="border" variant="primary" />
-          </div>
-        ) : pengeluaranLain?.length > 0 ? (
-          <CustomTable
-            tableHeader={tableHeader}
-            data={pengeluaranLain}
-            handleRowClick={handleRowClick}
-          />
-        ) : (
-          <div
-            className="d-flex align-items-center justify-content-center"
-            style={{ height: "50vh" }}
-          >
-            <Alert variant="secondary" className="mt-3 text-center">
-              Belum ada Pengeluaran Lain....
-            </Alert>
-          </div>
-        )}
-      </Row>
-
-      {/* Modal */}
-      {showModal && (
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Stack
-              direction="horizontal"
-              gap={2}
-              className="justify-content-end"
+          </Paper>
+          {isLoading ? (
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ height: "50vh" }}
             >
-              <Button
-                variant="primary"
-                disabled={isPending}
-                onClick={() => delData(selectedRow.id)}
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : pengeluaranLain?.length > 0 ? (
+            <CustomTable
+              tableHeader={tableHeader}
+              data={pengeluaranLain}
+              handleRowClick={handleRowClick}
+            />
+          ) : (
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ height: "50vh" }}
+            >
+              <Alert variant="secondary" className="mt-3 text-center">
+                Belum ada Pengeluaran Lain....
+              </Alert>
+            </div>
+          )}
+        </Row>
+
+        {/* Modal */}
+        {showModal && (
+          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+                Data
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Stack
+                direction="horizontal"
+                gap={2}
+                className="justify-content-end"
               >
-                {isPending ? (
-                  <>
-                    <Spinner
-                      as="span"
-                      animation="grow"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                    />
-                    Loading...
-                  </>
-                ) : (
-                  <span>OK</span>
-                )}
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleCloseModal}
-                disabled={isPending}
-              >
-                Batal
-              </Button>
-            </Stack>
-          </Modal.Body>
-        </Modal>
-      )}
+                <Button
+                  variant="primary"
+                  disabled={isPending}
+                  onClick={
+                    isSaveModal ? submitData : () => delData(selectedRow.id)
+                  }
+                >
+                  {isPending ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="grow"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                      Loading...
+                    </>
+                  ) : (
+                    <span>OK</span>
+                  )}
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleCloseModal}
+                  disabled={isPending}
+                >
+                  Batal
+                </Button>
+              </Stack>
+            </Modal.Body>
+          </Modal>
+        )}
+      </Form>
     </Container>
   );
 };

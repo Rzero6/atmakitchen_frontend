@@ -36,7 +36,7 @@ import { GetAllRole } from "../../../api/apiRole";
 
 export const tableHeader = [
   { id: "jabatan", label: "Jabatan", minWidth: 100 },
-  { id: "nama", label: "Nama", minWidth: 200 },
+  { id: "nama", label: "Nama", minWidth: 100 },
   {
     id: "email",
     label: "Email",
@@ -64,11 +64,11 @@ const Karyawan = () => {
   const [role, setRole] = useState([]);
   const [roleMap, setRoleMap] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isDelDisabled, setIsDelDisabled] = useState(true);
+  const [isSaveModal, setIsSaveModal] = useState(true);
   const [data, setData] = useState({
     nama: "",
     email: "",
@@ -186,12 +186,6 @@ const Karyawan = () => {
         handleCloseModal();
       });
   };
-
-  const handleShowModal = (type) => {
-    setShowModal(true);
-    console.log("show");
-    setModalType(type);
-  };
   const handleCloseModal = () => {
     setShowModal(false);
     clearAll();
@@ -200,6 +194,7 @@ const Karyawan = () => {
 
   const submitData = (event) => {
     event.preventDefault();
+    setShowModal(false);
     setIsPending(true);
     setIsDelDisabled(true);
     if (selectedRow) {
@@ -239,7 +234,7 @@ const Karyawan = () => {
   };
 
   return (
-    <Container className="p-3">
+    <Container className="p-1">
       <Stack
         direction="horizontal"
         gap={3}
@@ -251,7 +246,7 @@ const Karyawan = () => {
 
       <Row className="justify-content-center align-items-center">
         <Paper
-          className="mb-3 p-3"
+          className="mb-3 py-3"
           sx={{ width: "100vh", overflow: "hidden", overflowX: "auto" }}
         >
           <Form>
@@ -326,7 +321,10 @@ const Karyawan = () => {
                     className="flex-grow-1"
                     size="lg"
                     variant="success"
-                    onClick={submitData}
+                    onClick={() => {
+                      setIsSaveModal(true);
+                      setShowModal(true);
+                    }}
                     disabled={
                       data.nama.trim() === "" ||
                       (typeof data.id_role === "string"
@@ -380,7 +378,10 @@ const Karyawan = () => {
                   onClick={
                     isFilling
                       ? () => clearAll()
-                      : () => handleShowModal("Hapus")
+                      : () => {
+                          setIsSaveModal(false);
+                          setShowModal(true);
+                        }
                   }
                   disabled={isDelDisabled}
                 >
@@ -420,7 +421,8 @@ const Karyawan = () => {
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              Konfirmasi <strong>{modalType}</strong> Data
+              Konfirmasi <strong>{isSaveModal ? "Simpan" : "Hapus"}</strong>{" "}
+              Data
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -432,7 +434,9 @@ const Karyawan = () => {
               <Button
                 variant="primary"
                 disabled={isPending}
-                onClick={() => delData(selectedRow.id_user)}
+                onClick={
+                  isSaveModal ? submitData : () => delData(selectedRow.id)
+                }
               >
                 {isPending ? (
                   <>

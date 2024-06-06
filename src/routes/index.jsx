@@ -3,7 +3,6 @@ import { ToastContainer } from "react-toastify";
 import Home from "../layouts/user/pages/Home";
 import UserLayout from "../layouts/user/UserLayout";
 import AdminLayout from "../layouts/admin/AdminLayout";
-import Dashboard from "../layouts/admin/pages/Dashboard";
 import Penitip from "../layouts/mo/pages/Penitip";
 import AdminProtectedRoutes from "./AdminProtectedRoutes";
 import MOProtectedRoutes from "./MOProtectedRoutes";
@@ -20,11 +19,26 @@ import Produk from "../layouts/admin/pages/Produk";
 import Hampers from "../layouts/admin/pages/Hampers";
 import CustomerProtectedRoutes from "./CustomerProtectedRoutes";
 import Profile from "../layouts/user/pages/Profile";
-import RiwayatPesanan from "../layouts/user/pages/RiwayatPesanan";
 import PembelianBahanBaku from "../layouts/mo/pages/PembelianBahanBaku";
 import Resep from "../layouts/admin/pages/Resep";
 import { ChangePasswordPage } from "../layouts/changePassword";
 import GajiDanBonus from "../layouts/owner/pages/GajiDanBonus";
+import ShowAllProduk from "../layouts/user/pages/ProdukShowRoom/ShowAllProduk";
+import { GlobalStateProvider } from "../api/contextAPI";
+import PesananTabs from "../layouts/user/pages/pesanan/Pesanan";
+import DashboardAdmin from "../layouts/admin/pages/Dashboard";
+import DashboardMO from "../layouts/mo/pages/Dashboard";
+import DashboardOwner from "../layouts/owner/pages/Dashboard";
+import Cart from "../layouts/user/pages/pesanan/Cart";
+import PenarikanSaldo from "../layouts/user/pages/TarikSaldo";
+import KonfirmasiTarikSaldo from "../layouts/admin/pages/KonfirmasiTarikSaldo";
+import LaporanPresensidanGaji from "../layouts/owner/pages/LaporanPresensidanGaji";
+import LaporanPemasukandanPengeluaran from "../layouts/owner/pages/LaporanPemasukandanPengeluaran";
+import LaporanRekapPenitip from "../layouts/owner/pages/LaporanRekapTransaksiPenitip";
+import LaporanPenjualan from "../layouts/owner/pages/LaporanPenjualan";
+import LaporanStokHariIni from "../layouts/owner/pages/LaporanStokHariIni";
+import LaporanPenjualanProduk from "../layouts/owner/pages/LaporanPenjualanProduk";
+import LaporanPenggunaanBahanBaku from "../layouts/owner/pages/LaporanPenggunaanBahanBaku";
 
 const router = createBrowserRouter([
   {
@@ -36,7 +50,13 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <UserLayout />,
-        children: [{ path: "/", element: <Home /> }],
+        children: [
+          { path: "/", element: <Home /> },
+          {
+            path: "/produk",
+            element: <ShowAllProduk />,
+          },
+        ],
       },
       {
         children: [
@@ -59,8 +79,16 @@ const router = createBrowserRouter([
         ),
         children: [
           { path: "/profile", element: <Profile /> },
-          { path: "/riwayat-pesanan", element: <RiwayatPesanan /> },
+          { path: "/pesanan", element: <PesananTabs /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
+          {
+            path: "/cart",
+            element: <Cart />,
+          },
+          {
+            path: "/saldo",
+            element: <PenarikanSaldo />,
+          },
         ],
       },
       {
@@ -71,13 +99,17 @@ const router = createBrowserRouter([
           </AdminProtectedRoutes>
         ),
         children: [
-          { path: "/admin", element: <Dashboard /> },
+          { path: "/admin", element: <DashboardAdmin /> },
           { path: "/admin/pelanggan", element: <Customer /> },
           { path: "/admin/bahanbaku", element: <BahanBaku /> },
           { path: "/admin/produk", element: <Produk /> },
           { path: "/admin/resep", element: <Resep /> },
           { path: "/admin/hampers", element: <Hampers /> },
           { path: "/admin/change-password", element: <ChangePasswordPage /> },
+          {
+            path: "/admin/konfirmasi-tarik-saldo",
+            element: <KonfirmasiTarikSaldo />,
+          },
         ],
       },
       {
@@ -88,7 +120,7 @@ const router = createBrowserRouter([
           </MOProtectedRoutes>
         ),
         children: [
-          { path: "/mo", element: <Dashboard /> },
+          { path: "/mo", element: <DashboardMO /> },
           // { path: "/mo/jabatan", element: <Customer /> },
           { path: "/mo/karyawan", element: <Karyawan /> },
           { path: "/mo/penitip", element: <Penitip /> },
@@ -105,9 +137,37 @@ const router = createBrowserRouter([
           </OwnerProtectedRoutes>
         ),
         children: [
-          { path: "/owner", element: <Dashboard /> },
+          { path: "/owner", element: <DashboardOwner /> },
           { path: "/owner/change-password", element: <ChangePasswordPage /> },
           { path: "/owner/gaji-bonus", element: <GajiDanBonus /> },
+          {
+            path: "/owner/laporan-presensi-gaji",
+            element: <LaporanPresensidanGaji />,
+          },
+          {
+            path: "/owner/laporan-pemasukan-pengeluaran",
+            element: <LaporanPemasukandanPengeluaran />,
+          },
+          {
+            path: "/owner/laporan-rekap-penitip",
+            element: <LaporanRekapPenitip />,
+          },
+          {
+            path: "/owner/laporan-penjualan",
+            element: <LaporanPenjualan />,
+          },
+          {
+            path: "/owner/laporan-stok-hari-ini",
+            element: <LaporanStokHariIni />,
+          },
+          {
+            path: "/owner/laporan-penggunaan-bahan-baku",
+            element: <LaporanPenggunaanBahanBaku />,
+          },
+          {
+            path: "/owner/laporan-penjualan-produk",
+            element: <LaporanPenjualanProduk />,
+          },
         ],
       },
     ],
@@ -115,7 +175,7 @@ const router = createBrowserRouter([
 ]);
 const AppRouter = () => {
   return (
-    <>
+    <GlobalStateProvider>
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -129,7 +189,7 @@ const AppRouter = () => {
         theme="light"
       />
       <RouterProvider router={router} />
-    </>
+    </GlobalStateProvider>
   );
 };
 export default AppRouter;

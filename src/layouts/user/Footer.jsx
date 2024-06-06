@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-
+import LoremIpsum from "react-lorem-ipsum";
 const Footer = () => {
   return (
     <>
@@ -9,11 +9,11 @@ const Footer = () => {
           <Row className="p-3">
             <Col>
               <h3>Tentang</h3>
-              <p>
-                Temukan opsi terbaik untuk merental mobil dengan website kami.
-                Kami memiliki banyak opsi kendaraan dari mobil kecil sampai
-                dengan truk dan bis yang banyak.
-              </p>
+              <LoremIpsum
+                p={1}
+                avgWordsPerSentence={6}
+                avgSentencesPerParagraph={4}
+              />
             </Col>
 
             <Col className="text-center">
@@ -57,13 +57,14 @@ const Footer = () => {
                   <i className="fa-solid fa-phone"></i> +1 (123) 456-7890
                 </p>
                 <p>
-                  <i className="fa-solid fa-envelope"></i> info@rentalmobil.com
+                  <i className="fa-solid fa-envelope"></i>{" "}
+                  atma.kitchen.jaya@gmail.com
                 </p>
               </address>
             </Col>
           </Row>
           <Row className="text-center">
-            <p>&copy; {new Date().getFullYear()} Rental Mobil</p>
+            <p>&copy; {new Date().getFullYear()} Atma Kitchen</p>
             <ul className="list-inline">
               <li className="list-inline-item">
                 <Link
