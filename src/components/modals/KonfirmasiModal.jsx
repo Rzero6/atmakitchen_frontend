@@ -15,7 +15,11 @@ const KonfirmasiModal = ({
   };
   return (
     <>
-      <Button variant={buttonVariant} onClick={() => setShow(true)}>
+      <Button
+        className="w-100 m-1"
+        variant={buttonVariant}
+        onClick={() => setShow(true)}
+      >
         {title}
       </Button>
       {/* Modal */}

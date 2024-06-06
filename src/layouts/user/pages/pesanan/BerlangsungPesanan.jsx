@@ -45,7 +45,6 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
       return 25000;
     }
   };
-
   const filteredTransaksi = transaksi.filter((atransaksi) => {
     const queryTerms = searchQuery
       .toLowerCase()
@@ -167,27 +166,33 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
               ))}
             </p>
             <p className="customP">
-              Total Pembayaran:{" Rp. "}
-              {atransaksi.total_harga.toLocaleString("id-ID") + " = Rp. "}
-              {atransaksi.detail
-                .reduce((total, adetail) => {
-                  const hargaProduk = adetail.produk
-                    ? adetail.produk.harga * adetail.jumlah
-                    : 0;
-                  const hargaHampers = adetail.hampers
-                    ? adetail.hampers.harga * adetail.jumlah
-                    : 0;
-                  return total + hargaProduk + hargaHampers;
-                }, 0)
-                .toLocaleString("id-ID")}{" "}
-              {atransaksi.id_alamat !== null && (
-                <span>
-                  + Rp.{" "}
-                  {checkHargaKirim(atransaksi.jarak).toLocaleString("id-ID")}{" "}
-                  (Pengiriman)
-                </span>
+              Total Pembayaran: {" Rp. "}
+              {atransaksi.id_alamat !== null ? (
+                <>
+                  {atransaksi.total_harga.toLocaleString("id-ID")} = Rp.{" "}
+                  <span>
+                    + Rp.{" "}
+                    {checkHargaKirim(atransaksi.jarak).toLocaleString("id-ID")}{" "}
+                    (Pengiriman)
+                  </span>
+                </>
+              ) : (
+                <>
+                  {atransaksi.detail
+                    .reduce((total, adetail) => {
+                      const hargaProduk = adetail.produk
+                        ? adetail.produk.harga * adetail.jumlah
+                        : 0;
+                      const hargaHampers = adetail.hampers
+                        ? adetail.hampers.harga * adetail.jumlah
+                        : 0;
+                      return total + hargaProduk + hargaHampers;
+                    }, 0)
+                    .toLocaleString("id-ID")}{" "}
+                </>
               )}
             </p>
+
             {isPending ? (
               <div className="d-flex justify-content-end">
                 <Spinner animation="border" variant="primary"></Spinner>

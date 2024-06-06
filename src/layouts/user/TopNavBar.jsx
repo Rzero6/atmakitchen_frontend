@@ -132,6 +132,9 @@ const TopNavbar = ({ routes }) => {
                   <MenuItem onClick={() => navigate("/pesanan")}>
                     Pesanan
                   </MenuItem>
+                  <MenuItem onClick={() => navigate("/saldo")}>
+                    Tarik Saldo
+                  </MenuItem>
                   <MenuItem onClick={handleShowModal}>Logout</MenuItem>
                 </Menu>
               </Stack>

@@ -207,7 +207,10 @@ const ProdukAll = ({
             </Button>
             <Button
               variant="primary"
-              disabled={selectedProduk.limit_po - countLimit() <= 0}
+              disabled={
+                selectedProduk.limit_po === 0 &&
+                selectedProduk.limit_po - countLimit() <= 0
+              }
               onClick={() => handleAdtoCart(selectedProduk, jumlah)}
             >
               Add to Cart

@@ -98,6 +98,7 @@ const Cart = () => {
                 toast.success("Berhasil");
                 setIsPending(false);
                 setCart([]);
+                setShowModal(false);
               }
             })
             .catch((err) => {

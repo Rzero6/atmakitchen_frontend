@@ -30,7 +30,15 @@ import DashboardAdmin from "../layouts/admin/pages/Dashboard";
 import DashboardMO from "../layouts/mo/pages/Dashboard";
 import DashboardOwner from "../layouts/owner/pages/Dashboard";
 import Cart from "../layouts/user/pages/pesanan/Cart";
-
+import PenarikanSaldo from "../layouts/user/pages/TarikSaldo";
+import KonfirmasiTarikSaldo from "../layouts/admin/pages/KonfirmasiTarikSaldo";
+import LaporanPresensidanGaji from "../layouts/owner/pages/LaporanPresensidanGaji";
+import LaporanPemasukandanPengeluaran from "../layouts/owner/pages/LaporanPemasukandanPengeluaran";
+import LaporanRekapPenitip from "../layouts/owner/pages/LaporanRekapTransaksiPenitip";
+import LaporanPenjualan from "../layouts/owner/pages/LaporanPenjualan";
+import LaporanStokHariIni from "../layouts/owner/pages/LaporanStokHariIni";
+import LaporanPenjualanProduk from "../layouts/owner/pages/LaporanPenjualanProduk";
+import LaporanPenggunaanBahanBaku from "../layouts/owner/pages/LaporanPenggunaanBahanBaku";
 
 const router = createBrowserRouter([
   {
@@ -47,10 +55,6 @@ const router = createBrowserRouter([
           {
             path: "/produk",
             element: <ShowAllProduk />,
-          },
-          {
-            path: "/cart",
-            element: <Cart />,
           },
         ],
       },
@@ -77,6 +81,14 @@ const router = createBrowserRouter([
           { path: "/profile", element: <Profile /> },
           { path: "/pesanan", element: <PesananTabs /> },
           { path: "/change-password", element: <ChangePasswordPage /> },
+          {
+            path: "/cart",
+            element: <Cart />,
+          },
+          {
+            path: "/saldo",
+            element: <PenarikanSaldo />,
+          },
         ],
       },
       {
@@ -94,6 +106,10 @@ const router = createBrowserRouter([
           { path: "/admin/resep", element: <Resep /> },
           { path: "/admin/hampers", element: <Hampers /> },
           { path: "/admin/change-password", element: <ChangePasswordPage /> },
+          {
+            path: "/admin/konfirmasi-tarik-saldo",
+            element: <KonfirmasiTarikSaldo />,
+          },
         ],
       },
       {
@@ -124,6 +140,34 @@ const router = createBrowserRouter([
           { path: "/owner", element: <DashboardOwner /> },
           { path: "/owner/change-password", element: <ChangePasswordPage /> },
           { path: "/owner/gaji-bonus", element: <GajiDanBonus /> },
+          {
+            path: "/owner/laporan-presensi-gaji",
+            element: <LaporanPresensidanGaji />,
+          },
+          {
+            path: "/owner/laporan-pemasukan-pengeluaran",
+            element: <LaporanPemasukandanPengeluaran />,
+          },
+          {
+            path: "/owner/laporan-rekap-penitip",
+            element: <LaporanRekapPenitip />,
+          },
+          {
+            path: "/owner/laporan-penjualan",
+            element: <LaporanPenjualan />,
+          },
+          {
+            path: "/owner/laporan-stok-hari-ini",
+            element: <LaporanStokHariIni />,
+          },
+          {
+            path: "/owner/laporan-penggunaan-bahan-baku",
+            element: <LaporanPenggunaanBahanBaku />,
+          },
+          {
+            path: "/owner/laporan-penjualan-produk",
+            element: <LaporanPenjualanProduk />,
+          },
         ],
       },
     ],

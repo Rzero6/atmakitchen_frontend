@@ -24,7 +24,7 @@ const CheckJarak = ({ transaksi, fetchTransaksi }) => {
       return 25000;
     }
   };
-  const hargaTanpaKirim = transaksi.map((atransaksi) => {
+  const hargaTanpaKirim = (atransaksi) => {
     return atransaksi.detail.reduce((total, adetail) => {
       const hargaProduk = adetail.produk
         ? adetail.produk.harga * adetail.jumlah
@@ -34,14 +34,15 @@ const CheckJarak = ({ transaksi, fetchTransaksi }) => {
         : 0;
       return total + hargaProduk + hargaHampers;
     }, 0);
-  });
+  };
+
   const handleKonfirmasi = (konfirm, atransaksi) => {
     setIsPending(true);
     const data = {
       id: atransaksi.id,
       status: konfirm,
       jarak: jarak,
-      total_harga: hargaTanpaKirim[0] + checkHargaKirim(),
+      total_harga: hargaTanpaKirim(atransaksi) + checkHargaKirim(),
     };
     UpdateTransaksi(data)
       .then((res) => {
@@ -103,9 +104,9 @@ const CheckJarak = ({ transaksi, fetchTransaksi }) => {
             ))}
           </p>
           <p className="customP">
-            Total Pembayaran: {hargaTanpaKirim[0] + checkHargaKirim()}
+            Total Pembayaran: {hargaTanpaKirim(atransaksi) + checkHargaKirim()}
             {" = "}
-            {hargaTanpaKirim}
+            {hargaTanpaKirim(atransaksi)}
             {" + "} {checkHargaKirim()}
           </p>
 

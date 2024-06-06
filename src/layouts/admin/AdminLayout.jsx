@@ -11,11 +11,17 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { SiCakephp } from "react-icons/si";
 import { RiLockPasswordFill } from "react-icons/ri";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
 const routes = [
   {
     path: "/admin",
     name: "Dashboard",
     icon: <MdDashboard />,
+  },
+  {
+    path: "/admin/konfirmasi-tarik-saldo",
+    name: "Pengajuan Tarik Saldo",
+    icon: <FaMoneyBillTransfer />,
   },
   {
     path: "/admin/pelanggan",
