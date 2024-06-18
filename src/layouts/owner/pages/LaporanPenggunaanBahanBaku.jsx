@@ -77,7 +77,6 @@ const LaporanPenggunaanBahanBaku = () => {
       item.status === "selesai"
     );
   });
-  console.log(filteredTransaksi);
 
   const totalTakaranBahan = (id_bahan_baku) => {
     let count = 0;

@@ -50,10 +50,10 @@ const PesananTabs = () => {
       case "sedang dikirim kurir":
       case "selesai":
         return "#d4edda";
-      case "batal":
+      case "ditolak":
+      case "dibatalkan":
         return "#f5c6cb";
       case "sudah dibayar":
-      case "dikembalikan":
       case "diproses":
         return "#cce5ff";
       default:

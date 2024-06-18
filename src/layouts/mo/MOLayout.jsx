@@ -5,9 +5,16 @@ import {
   FaMoneyBillWave,
   FaPeopleCarry,
   FaBoxOpen,
+  FaMoneyBill,
+  FaCalendarCheck,
+  FaBox,
 } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
-import { FaPeopleGroup, FaRankingStar } from "react-icons/fa6";
+import { MdBakeryDining, MdDashboard } from "react-icons/md";
+import {
+  FaMoneyBillTrendUp,
+  FaPeopleGroup,
+  FaRankingStar,
+} from "react-icons/fa6";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { RiLockPasswordFill } from "react-icons/ri";
 const routes = [
@@ -40,6 +47,41 @@ const routes = [
     path: "/mo/pengeluaran-lain",
     name: "Pengeluaran Lain",
     icon: <FaMoneyBillWave />,
+  },
+  {
+    path: "/mo/laporan-pemasukan-pengeluaran",
+    name: "Pemasukan & Pengeluaran",
+    icon: <FaMoneyBill />,
+  },
+  {
+    path: "/mo/laporan-penjualan",
+    name: "Penjualan Tahunan",
+    icon: <FaMoneyBillTrendUp />,
+  },
+  {
+    path: "/mo/laporan-penjualan-produk",
+    name: "Penjualan Produk Bulanan",
+    icon: <MdBakeryDining />,
+  },
+  {
+    path: "/mo/laporan-presensi-gaji",
+    name: "Presensi & Gaji",
+    icon: <FaCalendarCheck />,
+  },
+  {
+    path: "/mo/laporan-penggunaan-bahan-baku",
+    name: "Penggunaan Bahan Baku",
+    icon: <FaBoxOpen />,
+  },
+  {
+    path: "/mo/laporan-stok-hari-ini",
+    name: "Stok Hari Ini",
+    icon: <FaBox />,
+  },
+  {
+    path: "/mo/laporan-rekap-penitip",
+    name: "Rekap Penitip",
+    icon: <FaPeopleCarry />,
   },
   {
     path: "/mo/change-password",

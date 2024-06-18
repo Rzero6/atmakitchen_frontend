@@ -31,8 +31,8 @@ const Home = () => {
             text="First slide"
           />
           <Carousel.Caption className="bg-black bg-opacity-50 rounded-2">
-            <h3>First slide label</h3>
-            <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+            <h3>Cintai Usus Mu</h3>
+            <p>Minum Yakult Tiap Hari</p>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -43,8 +43,8 @@ const Home = () => {
             text="Second slide"
           />
           <Carousel.Caption className="bg-black bg-opacity-50 rounded-2">
-            <h3>Second slide label</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <h3>Berbagi Bersama</h3>
+            <p>Di Pizza Hut</p>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
@@ -55,9 +55,9 @@ const Home = () => {
             text="Third slide"
           />
           <Carousel.Caption className="bg-black bg-opacity-50 rounded-2">
-            <h3>Third slide label</h3>
+            <h3>Yamaha</h3>
             <p>
-              Praesent commodo cursus magna, vel scelerisque nisl consectetur.
+              Semakin didepan
             </p>
           </Carousel.Caption>
         </Carousel.Item>
