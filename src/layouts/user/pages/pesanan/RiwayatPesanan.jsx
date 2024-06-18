@@ -35,8 +35,8 @@ const RiwayatPesanan = ({ transaksi, getStatusColor }) => {
 
     if (
       atransaksi.status !== "selesai" &&
-      atransaksi.status !== "batal" &&
-      atransaksi.status !== "dikembalikan"
+      atransaksi.status !== "dibatalkan" &&
+      atransaksi.status !== "ditolak"
     ) {
       return false;
     }

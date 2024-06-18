@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { Container, Stack, Spinner, Alert } from "react-bootstrap";
+import { Container, Stack, Spinner, Alert, Row } from "react-bootstrap";
 import { GetAllTransaksi } from "../../../api/apiTransaksi";
 import { Box, Tabs, Tab } from "@mui/material";
 import CheckPembayaran from "./ListTransaksi/CheckPembayaran";
@@ -34,7 +34,7 @@ const DashboardAdmin = () => {
     return value === index ? <Box sx={{ p: 3 }}>{children}</Box> : null;
   };
   return (
-    <Container className="p-3">
+    <Container className="p-5">
       <Stack
         direction="horizontal"
         gap={3}
@@ -51,7 +51,7 @@ const DashboardAdmin = () => {
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        <Box sx={{ width: "100%" }}>
+        <Box className="p-3" sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
               value={tab}
@@ -84,7 +84,7 @@ const DashboardAdmin = () => {
           <TabPanel value={tab} index={2}>
             <SiapPickUp
               transaksi={transaksi.filter(
-                (transaksi) => transaksi.status === "siap di-pickup"
+                (transaksi) => transaksi.status === "diproses"
               )}
               fetchTransaksi={fetchTransaksi}
             />

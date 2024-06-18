@@ -206,7 +206,8 @@ const BerlangsungPesanan = ({ transaksi, getStatusColor, fetchTransaksi }) => {
                     fetchTransaksi={fetchTransaksi}
                   />
                 )}
-                {atransaksi.status === "sedang dikirim kurir" && (
+                {(atransaksi.status === "sedang dikirim kurir" ||
+                  atransaksi.status === "siap di-pickup") && (
                   <KonfirmasiModal
                     title={"Pesanan Selesai"}
                     buttonVariant={"primary"}

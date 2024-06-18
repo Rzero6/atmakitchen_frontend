@@ -127,6 +127,34 @@ const router = createBrowserRouter([
           { path: "/mo/pembelian-bahanbaku", element: <PembelianBahanBaku /> },
           { path: "/mo/pengeluaran-lain", element: <PengeluaranLain /> },
           { path: "/mo/change-password", element: <ChangePasswordPage /> },
+          {
+            path: "/mo/laporan-presensi-gaji",
+            element: <LaporanPresensidanGaji />,
+          },
+          {
+            path: "/mo/laporan-pemasukan-pengeluaran",
+            element: <LaporanPemasukandanPengeluaran />,
+          },
+          {
+            path: "/mo/laporan-rekap-penitip",
+            element: <LaporanRekapPenitip />,
+          },
+          {
+            path: "/mo/laporan-penjualan",
+            element: <LaporanPenjualan />,
+          },
+          {
+            path: "/mo/laporan-stok-hari-ini",
+            element: <LaporanStokHariIni />,
+          },
+          {
+            path: "/mo/laporan-penggunaan-bahan-baku",
+            element: <LaporanPenggunaanBahanBaku />,
+          },
+          {
+            path: "/mo/laporan-penjualan-produk",
+            element: <LaporanPenjualanProduk />,
+          },
         ],
       },
       {

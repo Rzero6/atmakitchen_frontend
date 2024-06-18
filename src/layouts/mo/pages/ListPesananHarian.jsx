@@ -73,6 +73,34 @@ const ListPesananHarian = ({ transaksi }) => {
       });
     }
   });
+
+  const countTotal = (id_bahan_baku) => {
+    let count = 0;
+    for (const atransaksi of transaksi) {
+      for (const detail of atransaksi.detail) {
+        if (detail.id_produk !== null) {
+          for (const resep of detail.produk.resep) {
+            if (resep.id_bahan_baku === id_bahan_baku) {
+              count += resep.takaran * detail.jumlah;
+            }
+          }
+        }
+        if (detail.id_hampers !== null) {
+          for (const detailhampers of detail.hampers.detailhampers) {
+            if (detailhampers.id_produk !== null) {
+              for (const resep of detailhampers.produk.resep) {
+                if (resep.id_bahan_baku === id_bahan_baku) {
+                  count += resep.takaran * detailhampers.jumlah;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return count;
+  };
+
   rekapBahan.sort((a, b) => a.bahan_baku.nama.localeCompare(b.bahan_baku.nama));
 
   return (
@@ -183,11 +211,12 @@ const ListPesananHarian = ({ transaksi }) => {
                   <p key={index} className="customP">
                     {bahan.bahan_baku.nama +
                       " " +
-                      bahan.takaran +
+                      countTotal(bahan.bahan_baku.id) +
                       " " +
                       bahan.bahan_baku.satuan}
 
-                    {bahan.bahan_baku.stok <= bahan.takaran && (
+                    {bahan.bahan_baku.stok <=
+                      countTotal(bahan.bahan_baku.id) && (
                       <strong className="text-danger">
                         {"  (WARNING: STOK " +
                           bahan.bahan_baku.stok +

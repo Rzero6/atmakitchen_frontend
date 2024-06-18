@@ -25,6 +25,20 @@ const SiapPickUp = ({ transaksi, fetchTransaksi }) => {
         fetchTransaksi();
       });
   };
+  const checkHargaKirim = (jarak) => {
+    if (jarak <= 0) {
+      return 0;
+    }
+    if (jarak <= 5) {
+      return 10000;
+    } else if (jarak > 5 && jarak <= 10) {
+      return 15000;
+    } else if (jarak > 10 && jarak <= 15) {
+      return 20000;
+    } else {
+      return 25000;
+    }
+  };
   return transaksi?.length > 0 ? (
     <Col className="p-5">
       {transaksi.map((atransaksi, index) => (
@@ -105,10 +119,16 @@ const SiapPickUp = ({ transaksi, fetchTransaksi }) => {
             >
               <Button
                 variant="success"
-                onClick={() => handleKonfirmasi("selesai", atransaksi)}
+                onClick={
+                  atransaksi.id_alamat === null
+                    ? () => handleKonfirmasi("siap di-pickup", atransaksi)
+                    : () => handleKonfirmasi("sedang dikirim kurir", atransaksi)
+                }
                 disabled={isPending}
               >
-                Sudah Di-pickup
+                {atransaksi.id_alamat === null
+                  ? "Update Siap Di-pickup"
+                  : "Update Sedang Diantar"}
               </Button>
             </Stack>
           ) : (
