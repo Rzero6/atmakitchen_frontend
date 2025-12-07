@@ -1,8 +1,29 @@
-# React + Vite
+# Atma Kitchen
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Atma Kitchen** is a multi-platform application for ordering cakes via web and viewing products via mobile. The project consists of a **React web frontend**, a **Laravel backend**, and a **Flutter mobile application**.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Web (React)**:  
+  - Order cakes online  
+  - Product and stock management  
+  - Manage products, raw materials, recipes, and transactions  
+
+- **Mobile (Flutter)**:  
+  - Browse and view products  
+
+- **Backend (Laravel + Passport)**:  
+  - Authentication for users, admins, and roles  
+  - Manage products, hampers, recipes, customers, staff, and transactions  
+
+## Tech Stack
+
+- Frontend Web: React (Vite, JavaScript)  
+- Backend: Laravel (with Passport for API authentication)  
+- Mobile: Flutter  
+- Database: MySQL (assumed)  
+
+## Repos
+
+- [Backend Link](https://github.com/Rzero6/atmakitchen_backend)
+- [Mobile Link](https://github.com/Rzero6/atma_kitchen_mobile)
